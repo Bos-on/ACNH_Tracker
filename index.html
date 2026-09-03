@@ -14,18 +14,22 @@
   --color-text:#5C4033;--color-text-muted:#9B8579;
   --color-collected:#6A9F33;--color-border:#E0D7C6;
   --color-danger:#E8956F;--color-shadow:rgba(0,0,0,.06);
-/* System font stack only — Google Fonts (Noto Sans SC) was removed on
+/* System font stack only: Google Fonts (Noto Sans SC) was removed on
    purpose: the CDN is unreliable in mainland China and every target
    platform already ships a good CJK UI font. Zero network dependencies. */
   --radius-card:16px;--radius-sm:10px;--font-body:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Helvetica Neue',Arial,sans-serif;
 }
 body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-text);min-height:100vh}
+button{font-family:inherit}
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+button:focus-visible,.creature-item:focus-within{outline:3px solid var(--color-accent-warm);outline-offset:2px}
+button:disabled{cursor:not-allowed;opacity:.55}
 
 .navbar{position:sticky;top:0;z-index:100;background:var(--color-primary);border-bottom:none;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;gap:8px}
 .nav-left{display:flex;align-items:center;gap:8px;min-width:0;flex-shrink:1}
 .nav-title{font-size:clamp(14px,2.5vw,17px);font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:0.5px}
 .nav-tabs{display:flex;gap:2px;flex-shrink:0}
-.nav-tab{padding:7px 18px;border-radius:var(--radius-sm);border:none;background:transparent;color:rgba(255,255,255,.7);cursor:pointer;font-size:14px;font-weight:600;transition:all .2s;white-space:nowrap}
+.nav-tab{padding:7px 18px;border-radius:var(--radius-sm);border:none;background:transparent;color:rgba(255,255,255,.7);cursor:pointer;font-size:14px;font-weight:600;transition:background-color .2s,color .2s;white-space:nowrap}
 .nav-tab:hover{background:rgba(255,255,255,.15);color:#fff}
 .nav-tab.active{background:rgba(255,255,255,.25);color:#fff}
 
@@ -37,23 +41,25 @@ body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-t
 .progress-pct{font-size:20px;font-weight:700;color:var(--color-primary-dark)}
 .progress-bar{height:10px;background:var(--color-bg);border-radius:8px;overflow:hidden}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--color-primary),var(--color-primary-dark));border-radius:8px;transition:width .4s ease}
-.data-bar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:16px}
-.data-btn{padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text-muted);cursor:pointer;font-size:13px;transition:all .15s;box-shadow:0 1px 4px var(--color-shadow)}
+.data-bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;margin-bottom:16px}
+.storage-mode-note{margin-right:auto;max-width:660px;font-size:12px;line-height:1.5;color:var(--color-text-muted)}
+.data-btn{padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text-muted);cursor:pointer;font-size:13px;transition:border-color .15s,color .15s,background-color .15s;box-shadow:0 1px 4px var(--color-shadow)}
 .data-btn:hover{border-color:var(--color-primary);color:var(--color-primary-dark)}
 
 .today-panel{background:var(--color-surface);border-radius:var(--radius-card);margin-bottom:16px;box-shadow:0 1px 4px var(--color-shadow);overflow:hidden;border:1px solid var(--color-border)}
-.today-header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;cursor:pointer;user-select:none;border-bottom:1px solid transparent}
+.today-header{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;padding:14px 24px;cursor:pointer;user-select:none;border:0;border-bottom:1px solid transparent;background:transparent;color:inherit;text-align:left}
 .today-header:hover{background:var(--color-bg)}
 .today-header.open{border-bottom-color:var(--color-border)}
-.today-header h3{font-size:15px;display:flex;align-items:center;gap:10px}
+.today-heading{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px}
+.today-count{font-size:13px;color:var(--color-text-muted);font-weight:400}
 .today-header .arrow{transition:transform .2s;font-size:12px}
 .today-header.open .arrow{transform:rotate(90deg)}
 .today-body{display:none;padding:18px 24px}
 .today-body.open{display:block}
 .today-info{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:14px;font-size:14px}
-.hemi-btn{padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--color-primary);background:transparent;color:var(--color-primary-dark);cursor:pointer;font-size:13px;font-weight:500;transition:all .2s}
+.hemi-btn{padding:5px 14px;border-radius:var(--radius-sm);border:1px solid var(--color-primary);background:transparent;color:var(--color-primary-dark);cursor:pointer;font-size:13px;font-weight:500;transition:background-color .2s,color .2s}
 .hemi-btn.active{background:var(--color-primary);color:#fff}
-.today-group-header{font-size:14px;margin:12px 0 4px;color:var(--color-primary-dark);cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px}
+.today-group-header{font-size:14px;margin:12px 0 4px;padding:0;border:0;background:transparent;color:var(--color-primary-dark);cursor:pointer;user-select:none;display:flex;align-items:center;gap:6px;font-weight:700}
 .today-group-header:hover{color:var(--color-primary)}
 .today-group-header .arrow{transition:transform .2s;font-size:11px;display:inline-block}
 .today-group-header.open .arrow{transform:rotate(90deg)}
@@ -66,15 +72,15 @@ body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-t
 .filter-row:last-child{margin-bottom:0}
 .filter-label{font-size:13px;font-weight:600;color:var(--color-text-muted);min-width:60px}
 .filter-options{display:flex;flex-wrap:wrap;gap:5px}
-.filter-btn{padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg);color:var(--color-text);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s;white-space:nowrap}
+.filter-btn{padding:6px 12px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-bg);color:var(--color-text);cursor:pointer;font-size:13px;font-weight:500;transition:border-color .15s,background-color .15s,color .15s;white-space:nowrap}
 .filter-btn:hover{border-color:var(--color-primary);background:rgba(139,195,74,.08)}
 .filter-btn.active{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
 .filter-btn.month-grid{width:36px;text-align:center;padding:6px 0}
-/* Only mark the current month/hour when it is not the active selection — the
+/* Only mark the current month/hour when it is not the active selection: the
    active (green) style must win so the user can tell "selected" apart from
    "just happens to be now". Applies to both the month and hour grids. */
 .filter-btn.is-now:not(.active){border-color:var(--color-accent-warm);box-shadow:0 0 0 1px var(--color-accent-warm)}
-.filter-reset{padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--color-danger);background:transparent;color:var(--color-danger);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s}
+.filter-reset{padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--color-danger);background:transparent;color:var(--color-danger);cursor:pointer;font-size:13px;font-weight:500;transition:background-color .15s,color .15s}
 .filter-reset:hover{background:var(--color-danger);color:#fff}
 .filter-toggle-btn{display:none;width:100%;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--color-primary);background:var(--color-surface);color:var(--color-primary-dark);cursor:pointer;font-size:14px;font-weight:600}
 .filter-panel{display:block}
@@ -90,6 +96,7 @@ body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-t
   .list-header{flex-wrap:wrap;row-gap:6px}
   .list-header .data-btn{margin-left:0!important}
   .creature-item{padding:12px 12px}
+  .storage-mode-note{flex-basis:100%;max-width:none}
 }
 
 .toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(16px);background:var(--color-text);color:var(--color-bg);padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;z-index:200;max-width:calc(100vw - 40px);text-align:center;display:flex;align-items:center;justify-content:center;gap:12px}
@@ -102,7 +109,7 @@ body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-t
 .modal{background:var(--color-surface);border-radius:var(--radius-card);padding:22px 24px;max-width:340px;width:calc(100vw - 48px);box-shadow:0 10px 36px rgba(0,0,0,.2);border:1px solid var(--color-border)}
 .modal-msg{font-size:14px;line-height:1.6;margin-bottom:18px;color:var(--color-text)}
 .modal-btns{display:flex;gap:8px;justify-content:flex-end}
-.modal-btn{padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);cursor:pointer;font-size:13px;font-weight:500;transition:all .15s}
+.modal-btn{padding:7px 16px;border-radius:var(--radius-sm);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);cursor:pointer;font-size:13px;font-weight:500;transition:border-color .15s,background-color .15s,color .15s}
 .modal-btn:hover{border-color:var(--color-primary)}
 .modal-btn-confirm{background:var(--color-primary);border-color:var(--color-primary);color:#fff}
 .modal-btn-confirm:hover{background:var(--color-primary-dark);border-color:var(--color-primary-dark);color:#fff}
@@ -112,8 +119,8 @@ body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-t
 
 .list-section{background:var(--color-surface);border-radius:var(--radius-card);overflow:hidden;box-shadow:0 1px 4px var(--color-shadow);border:1px solid var(--color-border)}
 .list-header{display:flex;align-items:center;padding:12px 20px;border-bottom:2px solid var(--color-border);font-size:13px;font-weight:600;color:var(--color-text-muted);gap:8px;background:rgba(139,195,74,.04)}
-.list-header .sortable{cursor:pointer;user-select:none;transition:color .2s}
-.list-header .sortable:hover{color:var(--color-primary-dark)}
+.sort-btn{padding:4px 6px;border:0;border-radius:6px;background:transparent;color:var(--color-text-muted);cursor:pointer;font-size:13px;font-weight:600;transition:background-color .15s,color .15s}
+.sort-btn:hover,.sort-btn[aria-pressed="true"]{color:var(--color-primary-dark);background:rgba(139,195,74,.08)}
 .creature-item{display:grid;grid-template-columns:32px 1fr auto;align-items:start;padding:14px 20px;border-bottom:1px solid var(--color-border);transition:opacity .3s,background .2s;gap:8px 12px;cursor:pointer}
 .creature-item:hover{background:rgba(139,195,74,.04)}
 .creature-item.collected{opacity:.5;background:rgba(106,159,51,.04)}
@@ -127,36 +134,36 @@ body{font-family:var(--font-body);background:var(--color-bg);color:var(--color-t
 .tag-weather{background:rgba(123,160,196,.2);color:#3F6280}
 .tag-price{color:var(--color-text-muted);font-weight:700;font-size:13px;white-space:nowrap}
 .note{font-size:12px;color:var(--color-text-muted);font-style:italic}
-.check-box{width:28px;height:28px;border-radius:8px;border:2px solid var(--color-border);display:flex;align-items:center;justify-content:center;transition:all .25s cubic-bezier(.4,0,.2,1);flex-shrink:0;margin-top:2px}
+.check-box{width:28px;height:28px;border-radius:8px;border:2px solid var(--color-border);display:flex;align-items:center;justify-content:center;transition:background-color .25s,border-color .25s;flex-shrink:0;margin-top:2px}
 .check-box::after{content:'\2713';color:#fff;font-size:16px;opacity:0;transition:opacity .2s;font-weight:700}
 .creature-meta{grid-column:1/-1;display:flex;flex-direction:column;gap:4px}
 .meta-row{font-size:11px;color:var(--color-text-muted);display:flex;align-items:center;gap:2px}
 .meta-label{min-width:40px;font-size:11px}
 .meta-hours{font-size:12px;color:var(--color-text)}
-.heat-cell{width:24px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:5px;font-size:10px;background:var(--color-bg);color:var(--color-text-muted);transition:all .15s;font-weight:500}
+.heat-cell{width:24px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-radius:5px;font-size:10px;background:var(--color-bg);color:var(--color-text-muted);transition:background-color .15s,color .15s,border-color .15s;font-weight:500}
 .heat-cell.on{background:var(--color-primary);color:#fff}
 .heat-cell.current{border:2px solid var(--color-accent-warm);box-shadow:0 0 0 1px var(--color-accent-warm)}
 .empty-state{padding:48px;text-align:center;color:var(--color-text-muted);font-size:15px}
+@media(hover:hover){button:active,.creature-item:active{transform:translateY(1px)}}
 </style>
 </head>
 <body>
 
-<nav class="navbar">
+<nav class="navbar" aria-label="生物类别">
   <div class="nav-left">
     <span class="nav-title">ACNH Tracker</span>
   </div>
-  <div class="nav-tabs" id="navTabs"></div>
+  <div class="nav-tabs" id="navTabs" role="group" aria-label="选择生物类别"></div>
 </nav>
 
-<div class="main">
-  <div class="progress-section" id="progressSection"></div>
+<main class="main">
+  <div class="progress-section" id="progressSection" aria-live="polite"></div>
   <div class="data-bar" id="dataBar"></div>
   <div class="today-panel" id="todayPanel"></div>
   <div class="filter-bar" id="filterBar"></div>
   <div class="list-section" id="listSection"></div>
-</div>
+</main>
 
-<script src="data.js" defer></script>
-<script src="app.js" defer></script>
+<script src="bundle.js" defer></script>
 </body>
 </html>

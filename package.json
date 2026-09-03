@@ -1,0 +1,11 @@
+{
+  "name": "acnh-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-bundle.mjs",
+    "test": "node --test",
+    "check": "node scripts/build-bundle.mjs --check && node --check scripts/module-parser.mjs && node --check schema.js && node --check core.js && node --check data.js && node --check ui.js && node --check app.js && node --check bundle.js && node --test"
+  }
+}

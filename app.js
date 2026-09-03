@@ -1,111 +1,48 @@
-const TAB_NAMES = { bug: '虫', fish: '鱼', sea: '海洋生物' };
+import { DATA_MAP } from './data.js';
+import { TAB_DEFINITIONS, TABS, monthsForHemisphere } from './schema.js';
+import { confirmDialog, escapeHtml, showToast } from './ui.js';
+import {
+  applyFilters,
+  createSafeStorage,
+  getCollectionAccess,
+  getFilterOptions,
+  getStorageModeNotice,
+  getTimeRangeLabel,
+  makeFilters,
+  normalizeCollected,
+  normalizeUIState,
+  parseBackup,
+  serializeBackup,
+  setCollectedForIds,
+  undoCollectedChanges,
+  validateImportFileSize
+} from './core.js';
+
+const TAB_NAMES = Object.fromEntries(TABS.map(tab => [tab, TAB_DEFINITIONS[tab].label]));
 
 const CONFIG = {
   STORAGE_KEYS: { collected: 'acnh_collected', hemisphere: 'acnh_hemisphere', ui: 'acnh_ui' },
   TICK_MS: 60000,
   MONTHS: 12,
   HOURS: 24,
-  TABS: Object.keys(TAB_NAMES),
+  TABS,
   SORT_KEYS: [{key:'name',label:'名称'},{key:'price',label:'价格'},{key:'collected',label:'收集'}],
   STATUS_OPTS: [['all','全部'],['uncollected','未收集'],['collected','已收集']]
 };
 
-function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+let storageAccessError = null;
+let collectionLoadFailed = false;
+let nativeStorage;
+try {
+  nativeStorage = window.localStorage;
+} catch (error) {
+  storageAccessError = error;
+  nativeStorage = {
+    getItem() { throw error; },
+    setItem() { throw error; }
+  };
 }
-
-let toastTimer = null;
-function showToast(msg, opts){
-  opts = opts || {};
-  let el = document.getElementById('toast');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'toast';
-    el.className = 'toast';
-    document.body.appendChild(el);
-  }
-  el.textContent = msg;
-  // An optional inline action (撤销 on bulk operations). textContent above
-  // wipes any button left over from a previous toast, so the new one is
-  // appended into a clean slate.
-  if (opts.action) {
-    const btn = document.createElement('button');
-    btn.className = 'toast-action';
-    btn.type = 'button';
-    btn.textContent = opts.action.label;
-    btn.addEventListener('click', () => {
-      clearTimeout(toastTimer);
-      el.classList.remove('show');
-      opts.action.onClick();
-    });
-    el.appendChild(btn);
-  }
-  // Force reflow so re-triggering while visible restarts the transition.
-  void el.offsetWidth;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  // Action toasts outlive plain ones — an undo affordance that vanishes in
-  // 2.6s is a tease, not a safety net.
-  toastTimer = setTimeout(() => el.classList.remove('show'), opts.duration || 2600);
-}
-
-// Native confirm() is gone: it blocks, it ignores the page's styling, and it
-// offers no focus handling. This in-page dialog replaces it — but only for
-// actions that replace everything at once and are too important to trust to
-// a transient toast (import-overwrite). Bulk mark/unmark skips it entirely
-// and relies on the toast's 撤销 action instead: undo is strictly safer than
-// a confirm that can't be taken back once clicked.
-// Escape/backdrop/取消 = cancel, Enter or 确定 = confirm; focus is restored
-// to whatever had it before the dialog opened.
-function confirmDialog(message, confirmLabel) {
-  return new Promise(resolve => {
-    const prevFocus = document.activeElement;
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML =
-      '<div class="modal" role="dialog" aria-modal="true">'
-      + '<p class="modal-msg"></p>'
-      + '<div class="modal-btns">'
-      + '<button type="button" class="modal-btn" data-r="cancel">取消</button>'
-      + '<button type="button" class="modal-btn modal-btn-confirm" data-r="ok"></button>'
-      + '</div></div>';
-    overlay.querySelector('.modal-msg').textContent = message;
-    const okBtn = overlay.querySelector('[data-r="ok"]');
-    okBtn.textContent = confirmLabel || '确定';
-    let done = false;
-    const close = result => {
-      if (done) return;
-      done = true;
-      overlay.classList.remove('show');
-      document.removeEventListener('keydown', onKey);
-      // Let the fade-out finish before detaching, then hand focus back.
-      setTimeout(() => {
-        overlay.remove();
-        if (prevFocus && prevFocus.isConnected) prevFocus.focus();
-      }, 200);
-      resolve(result);
-    };
-    const onKey = e => {
-      if (e.key === 'Escape') { e.preventDefault(); close(false); return; }
-      if (e.key === 'Enter') {
-        // Enter on a focused button should activate that button, not force
-        // confirm — only a bare Enter (dialog itself focused) confirms.
-        if (e.target && e.target.closest && e.target.closest('[data-r]')) return;
-        close(true);
-      }
-    };
-    overlay.addEventListener('click', e => {
-      if (e.target === overlay) return close(false);
-      const btn = e.target.closest('[data-r]');
-      if (btn) close(btn.dataset.r === 'ok');
-    });
-    document.addEventListener('keydown', onKey);
-    document.body.appendChild(overlay);
-    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(() => overlay.classList.add('show'));
-    else overlay.classList.add('show');
-    okBtn.focus();
-  });
-}
+const storage = createSafeStorage(nativeStorage);
 
 function toggleArrayFilter(name, value){
   const arr = state.filters[state.activeTab][name];
@@ -118,10 +55,14 @@ function toggleArrayFilter(name, value){
 // state; the applyFilters recount is just for the toast.
 function handleHemisphereChange(hemi){
   if (state.hemisphere === hemi) return;
+  const focusRoot = document.activeElement?.closest('#todayPanel')
+    ? '#todayPanel'
+    : document.activeElement?.closest('#filterBar') ? '#filterBar' : null;
+  if (!saveHemisphere(hemi)) return;
   state.hemisphere = hemi;
-  saveHemisphere();
   renderAll();
-  const remaining = applyFilters(DATA_MAP[state.activeTab], state.activeTab).length;
+  if (focusRoot) document.querySelector(focusRoot+' [data-hemi="'+hemi+'"]')?.focus();
+  const remaining = filteredItems(state.activeTab).length;
   const label = state.hemisphere === 'north' ? '北半球' : '南半球';
   showToast(remaining === 0
     ? '已切换到' + label + '，当前筛选条件下没有匹配的生物，可尝试重置筛选'
@@ -129,8 +70,8 @@ function handleHemisphereChange(hemi){
 }
 
 function hemisphereButtons(activeClass){
-  return '<button class="'+activeClass+(state.hemisphere==='north'?' active':'')+'" data-hemi="north">北半球</button>'
-       + '<button class="'+activeClass+(state.hemisphere==='south'?' active':'')+'" data-hemi="south">南半球</button>';
+  return '<button type="button" class="'+activeClass+(state.hemisphere==='north'?' active':'')+'" data-hemi="north" aria-pressed="'+(state.hemisphere==='north')+'">北半球</button>'
+       + '<button type="button" class="'+activeClass+(state.hemisphere==='south'?' active':'')+'" data-hemi="south" aria-pressed="'+(state.hemisphere==='south')+'">南半球</button>';
 }
 
 // The today panel re-renders on an hourly cadence, so its hemisphere buttons
@@ -149,130 +90,122 @@ function bindHemisphereButtons(root){
 // app.js having run, which leaks into anything else reading that data.
 const ALL_DATA = CONFIG.TABS.flatMap(type => DATA_MAP[type].map(item => ({ type, item })));
 
-// Collected ids are only meaningful if they match a real creature — imports
+// Collected ids are only meaningful if they match a real creature: imports
 // are validated against this set so junk ids can't squat in storage forever.
 const KNOWN_IDS = new Set(ALL_DATA.map(x => x.item.id));
 
-// Each tab only carries the array filters its data actually has, so
-// applyFilters' tab guards and the key set stay in agreement.
-function makeFilters(tab){
-  const now = getLocalTime();
-  const f = { month:null, hour:now.getHours(), hourManual:false, status:'all' };
-  if (tab === 'fish' || tab === 'bug') f.location = [];
-  if (tab === 'fish' || tab === 'sea') f.shadowSize = [];
-  if (tab === 'bug') f.weather = [];
-  return f;
-}
-
-// UI state (active tab, filters, sort, panel collapses) survives reloads.
-// hourManual is persisted alongside hour: the hour filter defaults to the
-// current clock hour and follows it on rollover, but once the user picks an
-// hour themselves that choice must survive a reload too — otherwise the next
-// rollover would silently overwrite it.
-// localStorage is untrusted input — a value of the wrong type here silently
-// breaks applyFilters (a string `location` makes every row fail the filter and
-// the list goes empty with no explanation), so each key is type-checked and a
-// bad value falls back to the default rather than being adopted.
-function isValidFilterValue(key, v, isArray) {
-  if (isArray) return Array.isArray(v) && v.every(x => typeof x === 'string');
-  if (key === 'status') return CONFIG.STATUS_OPTS.some(([val]) => val === v);
-  if (key === 'hourManual') return typeof v === 'boolean';
-  if (key === 'month') return v === null || (Number.isInteger(v) && v >= 1 && v <= CONFIG.MONTHS);
-  if (key === 'hour') return v === null || v === 'all' || (Number.isInteger(v) && v >= 0 && v < CONFIG.HOURS);
-  return false;
-}
-
-// Same untrusted-localStorage rule as the filters: todayGroups is only
-// adopted when it is a plain object carrying booleans under known tab keys.
-// (A stray string or array used to survive the spread in loadUIState.)
-function loadTodayGroups(saved) {
-  const g = { fish: true, bug: true, sea: true };
-  const s = saved.todayGroups;
-  if (s && typeof s === 'object' && !Array.isArray(s)) {
-    for (const t of CONFIG.TABS) {
-      if (typeof s[t] === 'boolean') g[t] = s[t];
-    }
-  }
-  return g;
-}
-
 function loadUIState() {
+  const result = storage.getItem(CONFIG.STORAGE_KEYS.ui);
+  if (!result.ok) storageAccessError ||= result.error;
   let saved = null;
-  try { saved = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEYS.ui)); } catch {}
-  if (!saved || typeof saved !== 'object') saved = {};
-  const filters = { fish: makeFilters('fish'), bug: makeFilters('bug'), sea: makeFilters('sea') };
-  for (const tab of CONFIG.TABS) {
-    const s = saved.filters && saved.filters[tab];
-    if (!s || typeof s !== 'object') continue;
-    const target = filters[tab];
-    for (const key of Object.keys(target)) {
-      if (!(key in s)) continue;
-      if (isValidFilterValue(key, s[key], Array.isArray(target[key]))) target[key] = s[key];
-    }
-    // A restored hour is only meaningful if the user chose it. Otherwise it is
-    // a stale snapshot of whatever hour the last session happened to end on, so
-    // resume following the clock instead.
-    if (!target.hourManual) target.hour = getLocalTime().getHours();
-  }
-  return {
-    activeTab: CONFIG.TABS.includes(saved.activeTab) ? saved.activeTab : 'bug',
-    filters,
-    sort: saved.sort && CONFIG.SORT_KEYS.some(k => k.key === saved.sort.key)
-      ? { key: saved.sort.key, dir: saved.sort.dir === 'desc' ? 'desc' : 'asc' }
-      : { key: null, dir: 'asc' },
-    todayOpen: !!saved.todayOpen,
-    filterOpen: !!saved.filterOpen,
-    todayUncollectedOnly: !!saved.todayUncollectedOnly,
-    todayGroups: loadTodayGroups(saved)
-  };
+  try { saved = result.value ? JSON.parse(result.value) : null; } catch {}
+  return normalizeUIState(saved, DATA_MAP, getLocalTime());
+}
+
+function loadHemisphere() {
+  const result = storage.getItem(CONFIG.STORAGE_KEYS.hemisphere);
+  if (!result.ok) storageAccessError ||= result.error;
+  return result.value === 'south' ? 'south' : 'north';
 }
 
 const state = {
   ...loadUIState(),
-  hemisphere: localStorage.getItem(CONFIG.STORAGE_KEYS.hemisphere) === 'south' ? 'south' : 'north',
+  hemisphere: loadHemisphere(),
   collected: loadCollected(),
 };
 
 function saveUIState() {
-  try {
-    localStorage.setItem(CONFIG.STORAGE_KEYS.ui, JSON.stringify({
-      activeTab: state.activeTab,
-      filters: state.filters,
-      sort: state.sort,
-      todayOpen: state.todayOpen,
-      filterOpen: state.filterOpen,
-      todayUncollectedOnly: state.todayUncollectedOnly,
-      todayGroups: state.todayGroups
-    }));
-  } catch {}
+  const result = storage.setItem(CONFIG.STORAGE_KEYS.ui, JSON.stringify({
+    activeTab: state.activeTab,
+    filters: state.filters,
+    sort: state.sort,
+    todayOpen: state.todayOpen,
+    filterOpen: state.filterOpen,
+    todayUncollectedOnly: state.todayUncollectedOnly,
+    todayGroups: state.todayGroups
+  }));
+  if (!result.ok) showStorageWarning();
+  return result.ok;
 }
 
 function loadCollected() {
-  try {
-    const s = localStorage.getItem(CONFIG.STORAGE_KEYS.collected);
-    if (s) return new Set(JSON.parse(s));
-  } catch {}
+  const result = storage.getItem(CONFIG.STORAGE_KEYS.collected);
+  let readError = result.ok ? null : result.error;
+  if (result.value) {
+    try {
+      const parsed = JSON.parse(result.value);
+      if (!Array.isArray(parsed)) throw new Error('invalid collection shape');
+      return normalizeCollected(parsed, KNOWN_IDS);
+    } catch {
+      readError = new Error('浏览器中的收集记录格式损坏');
+    }
+  }
   // Migrate from the legacy cookie (one-time), then clear it.
-  const m = document.cookie.split(';').find(c => c.trim().startsWith('acnh_collected='));
+  let legacyCookie = '';
+  try { legacyCookie = document.cookie; } catch {}
+  const m = legacyCookie.split(';').find(c => c.trim().startsWith('acnh_collected='));
   if (m) {
     try {
       const arr = JSON.parse(decodeURIComponent(m.split('=').slice(1).join('=')));
-      const set = new Set(arr);
-      try { localStorage.setItem(CONFIG.STORAGE_KEYS.collected, JSON.stringify(arr)); } catch {}
-      document.cookie = 'acnh_collected=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax';
+      const set = normalizeCollected(arr, KNOWN_IDS);
+      const saved = storage.setItem(CONFIG.STORAGE_KEYS.collected, JSON.stringify([...set]));
+      if (saved.ok) {
+        document.cookie = 'acnh_collected=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax';
+      } else {
+        storageAccessError ||= saved.error;
+      }
       return set;
     } catch {}
+  }
+  if (readError) {
+    collectionLoadFailed = true;
+    storageAccessError ||= readError;
   }
   return new Set();
 }
 
-function saveCollected() {
-  try { localStorage.setItem(CONFIG.STORAGE_KEYS.collected, JSON.stringify([...state.collected])); } catch {}
+function saveCollected(next) {
+  return storage.setItem(CONFIG.STORAGE_KEYS.collected, JSON.stringify([...next]));
+}
+
+function showStorageWarning() {
+  showToast('浏览器阻止了本地存储，当前更改无法可靠保存', { duration: 6000 });
+}
+
+function showCollectionLoadWarning() {
+  showToast('未能加载已有收集记录，已暂停导出和修改；可导入有效备份恢复', { duration: 8000 });
+}
+
+function renderCollectionViews() {
+  renderProgress();
+  renderTodayPanel();
+  renderList();
+}
+
+function commitCollected(next, options = {}) {
+  if (!getCollectionAccess(collectionLoadFailed).canEdit && !options.allowRecovery) {
+    showCollectionLoadWarning();
+    return false;
+  }
+  const result = saveCollected(next);
+  if (!result.ok) {
+    showStorageWarning();
+    return false;
+  }
+  const recovered = collectionLoadFailed;
+  collectionLoadFailed = false;
+  state.collected = next;
+  renderCollectionViews();
+  if (recovered) renderDataBar();
+  return true;
 }
 
 function exportCollected() {
-  const data = { version: 1, collected: [...state.collected] };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  if (!getCollectionAccess(collectionLoadFailed).canExport) {
+    showCollectionLoadWarning();
+    return;
+  }
+  const blob = new Blob([serializeBackup(state.collected)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   // Date-stamped so consecutive backups stay distinguishable in Downloads.
@@ -286,48 +219,52 @@ function exportCollected() {
   URL.revokeObjectURL(url);
 }
 
+let importInProgress = false;
 function importCollected(e) {
   const input = e.target;
   const file = input.files[0];
-  if (!file) return;
+  if (!file || importInProgress) return;
+  try {
+    validateImportFileSize(file.size);
+  } catch (error) {
+    showToast('导入失败：' + error.message);
+    input.value = '';
+    return;
+  }
+  importInProgress = true;
+  document.getElementById('importBtn').disabled = true;
   const reader = new FileReader();
   reader.onload = async () => {
     try {
-      const parsed = JSON.parse(reader.result);
-      const arr = Array.isArray(parsed) ? parsed : parsed.collected;
-      if (!Array.isArray(arr)) throw new Error('文件格式不正确');
-      // Unknown ids would sit in storage forever, never matching a row and
-      // silently inflating the imported count — drop them at the door and say
-      // so. A file with no recognizable ids at all is almost certainly not an
-      // export of this app.
-      const incoming = new Set(arr.filter(id => KNOWN_IDS.has(id)));
-      const dropped = new Set(arr).size - incoming.size;
-      if (incoming.size === 0) throw new Error('文件中没有可识别的生物记录');
+      const { collected: incoming, dropped } = parseBackup(reader.result, KNOWN_IDS);
       if (state.collected.size > 0) {
         const ok = await confirmDialog('导入将覆盖当前的 ' + state.collected.size + ' 条记录，是否继续？', '覆盖导入');
-        if (!ok) {
-          input.value = '';
-          return;
-        }
+        if (!ok) return;
       }
-      state.collected = incoming;
-      saveCollected();
-      renderAll();
-      showToast('导入成功，共 ' + incoming.size + ' 条记录' + (dropped > 0 ? '（已忽略 ' + dropped + ' 条无法识别的记录）' : ''));
+      if (commitCollected(incoming, { allowRecovery: true })) {
+        showToast('导入成功，共 ' + incoming.size + ' 条记录' + (dropped > 0 ? '（已忽略 ' + dropped + ' 条无法识别的记录）' : ''));
+      }
     } catch (err) {
       showToast('导入失败：' + err.message);
+    } finally {
+      importInProgress = false;
+      document.getElementById('importBtn').disabled = false;
+      input.value = '';
     }
-    input.value = '';
   };
   reader.onerror = () => {
     showToast('导入失败：无法读取文件');
+    importInProgress = false;
+    document.getElementById('importBtn').disabled = false;
     input.value = '';
   };
   reader.readAsText(file);
 }
 
-function saveHemisphere() {
-  try { localStorage.setItem(CONFIG.STORAGE_KEYS.hemisphere, state.hemisphere); } catch {}
+function saveHemisphere(next) {
+  const result = storage.setItem(CONFIG.STORAGE_KEYS.hemisphere, next);
+  if (!result.ok) showStorageWarning();
+  return result.ok;
 }
 
 function getLocalTime() { return new Date(); }
@@ -336,7 +273,7 @@ function isAvailableNow(item) {
   const now = getLocalTime();
   const month = now.getMonth() + 1;
   const hour = now.getHours();
-  const months = state.hemisphere === 'north' ? item.northMonths : item.southMonths;
+  const months = monthsForHemisphere(item, state.hemisphere);
   return months.includes(month) && item.hours.includes(hour);
 }
 
@@ -344,77 +281,18 @@ function isAvailableNow(item) {
 // separate runs (e.g. [0..4, 21..23]). Splitting them into "0-4时 / 21-23时"
 // misreads as two windows, so the head and tail runs are merged back into the
 // single wrapping range they represent: "21-4时".
-function getTimeRangeLabel(hours) {
-  if (hours.length === CONFIG.HOURS) return '全天';
-  const ranges = [];
-  let s = hours[0], e = hours[0];
-  for (let i = 1; i < hours.length; i++) {
-    if (hours[i] === e + 1) { e = hours[i]; }
-    else { ranges.push({s, e}); s = hours[i]; e = hours[i]; }
-  }
-  ranges.push({s, e});
-
-  const last = ranges[ranges.length - 1];
-  if (ranges.length > 1 && ranges[0].s === 0 && last.e === CONFIG.HOURS - 1) {
-    const head = ranges.shift();
-    ranges.pop();
-    ranges.unshift({s: last.s, e: head.e});
-  }
-
-  return ranges.map(r => r.s === r.e ? r.s + '时' : r.s + '-' + r.e + '时').join(' / ');
-}
-
-function applyFilters(data, tab) {
-  let items = [...data];
-  const f = state.filters[tab];
-
-  if (tab === 'fish' || tab === 'bug') {
-    if (f.location.length > 0) items = items.filter(x => f.location.includes(x.location));
-  }
-  if (tab === 'fish' || tab === 'sea') {
-    if (f.shadowSize.length > 0) items = items.filter(x => f.shadowSize.includes(x.shadowSize));
-  }
-  if (tab === 'bug') {
-    if (f.weather && f.weather.length > 0) items = items.filter(x => f.weather.includes(x.weather));
-  }
-  if (f.month !== null) {
-    const m = f.month;
-    items = items.filter(x => {
-      const months = state.hemisphere === 'north' ? x.northMonths : x.southMonths;
-      return months.includes(m);
-    });
-  }
-  if (f.hour !== null) {
-    if (f.hour === 'all') {
-      items = items.filter(x => x.hours.length === CONFIG.HOURS);
-    } else {
-      items = items.filter(x => x.hours.includes(f.hour));
-    }
-  }
-  if (f.status === 'collected') items = items.filter(x => state.collected.has(x.id));
-  if (f.status === 'uncollected') items = items.filter(x => !state.collected.has(x.id));
-
-  const sk = state.sort.key;
-  const sd = state.sort.dir === 'asc' ? 1 : -1;
-  if (sk) {
-    items.sort((a, b) => {
-      if (sk === 'name') return sd * a.name.localeCompare(b.name, 'zh');
-      if (sk === 'price') return sd * (a.price - b.price);
-      if (sk === 'collected') {
-        const ca = state.collected.has(a.id) ? 1 : 0;
-        const cb = state.collected.has(b.id) ? 1 : 0;
-        return sd * (ca - cb);
-      }
-      return 0;
-    });
-  }
-
-  return items;
+function filteredItems(tab) {
+  return applyFilters(DATA_MAP[tab], {
+    filters: state.filters[tab],
+    hemisphere: state.hemisphere,
+    collected: state.collected,
+    sort: state.sort
+  });
 }
 
 function renderNavTabs() {
   document.getElementById('navTabs').innerHTML = CONFIG.TABS.map(t =>
-    '<button class="nav-tab' + (state.activeTab===t?' active':'') + '" data-tab="'+t+'">' + TAB_NAMES[t] + '</button>'
+    '<button type="button" class="nav-tab' + (state.activeTab===t?' active':'') + '" data-tab="'+t+'" aria-pressed="'+(state.activeTab===t)+'">' + TAB_NAMES[t] + '</button>'
   ).join('');
 }
 
@@ -428,9 +306,9 @@ function renderProgress() {
   const allPct = allTotal > 0 ? (allCollected/allTotal*100).toFixed(1) : 0;
   document.getElementById('progressSection').innerHTML =
     '<div class="progress-text"><span class="progress-label">'+TAB_NAMES[state.activeTab]+' 收集进度</span><span class="progress-pct">已收集 '+collected+' / '+total+' （'+pct+'%）</span></div>' +
-    '<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div>' +
+    '<div class="progress-bar" role="progressbar" aria-label="'+TAB_NAMES[state.activeTab]+'收集进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+pct+'"><div class="progress-fill" style="width:'+pct+'%"></div></div>' +
     '<div class="progress-text" style="margin-top:14px"><span class="progress-label" style="font-size:13px">总进度</span><span style="font-size:15px;font-weight:700;color:var(--color-primary-dark)">已收集 '+allCollected+' / '+allTotal+' （'+allPct+'%）</span></div>' +
-    '<div class="progress-bar"><div class="progress-fill" style="width:'+allPct+'%"></div></div>';
+    '<div class="progress-bar" role="progressbar" aria-label="总收集进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+allPct+'"><div class="progress-fill" style="width:'+allPct+'%"></div></div>';
 }
 
 function renderTodayPanel() {
@@ -442,11 +320,10 @@ function renderTodayPanel() {
   if (state.todayUncollectedOnly) {
     nowAvailable = nowAvailable.filter(x => !state.collected.has(x.item.id));
   }
-  const byType = {
-    fish: nowAvailable.filter(x => x.type==='fish'),
-    bug: nowAvailable.filter(x => x.type==='bug'),
-    sea: nowAvailable.filter(x => x.type==='sea')
-  };
+  const byType = Object.fromEntries(CONFIG.TABS.map(type => [
+    type,
+    nowAvailable.filter(entry => entry.type === type)
+  ]));
 
   function todayRow(item, tags){
     const timeLabel = getTimeRangeLabel(item.hours);
@@ -458,16 +335,16 @@ function renderTodayPanel() {
       + item.price + ' 铃钱</span></div>';
   }
 
-  let html = '<div class="today-header'+(state.todayOpen?' open':'')+'" id="todayHeader"><h3><span class="arrow">▶</span> 今日可捕捉 （'+monStr+' '+hour+'时）</h3><span style="font-size:13px;color:var(--color-text-muted)">'+nowAvailable.length+' 种生物可捕捉</span></div>';
-  html += '<div class="today-body'+(state.todayOpen?' open':'')+'">';
+  let html = '<button type="button" class="today-header'+(state.todayOpen?' open':'')+'" id="todayHeader" aria-expanded="'+state.todayOpen+'" aria-controls="todayBody"><span class="today-heading"><span class="arrow" aria-hidden="true">▶</span> 今日可捕捉 （'+monStr+' '+hour+'时）</span><span class="today-count">'+nowAvailable.length+' 种生物可捕捉</span></button>';
+  html += '<div class="today-body'+(state.todayOpen?' open':'')+'" id="todayBody"'+(state.todayOpen?'':' hidden')+'>';
   html += '<div class="today-info"><span>当前半球：</span>'+hemisphereButtons('hemi-btn')
     + '<label class="today-toggle"><input type="checkbox" id="todayUncollected"'+(state.todayUncollectedOnly?' checked':'')+'>只看未收集</label></div>';
 
-  for (const t of ['fish','bug','sea']) {
+  for (const t of CONFIG.TABS) {
     const items = byType[t];
     const open = state.todayGroups[t];
-    html += '<h4 class="today-group-header'+(open?' open':'')+'" data-group="'+t+'"><span class="arrow">▶</span> '+TAB_NAMES[t]+' （'+items.length+'）</h4>';
-    html += '<div class="today-group-body'+(open?' open':'')+'" id="todayGroup-'+t+'">';
+    html += '<h4><button type="button" class="today-group-header'+(open?' open':'')+'" data-group="'+t+'" aria-expanded="'+open+'" aria-controls="todayGroup-'+t+'"><span class="arrow" aria-hidden="true">▶</span> '+TAB_NAMES[t]+' （'+items.length+'）</button></h4>';
+    html += '<div class="today-group-body'+(open?' open':'')+'" id="todayGroup-'+t+'"'+(open?'':' hidden')+'>';
     if (items.length === 0) {
       html += '<div class="today-item" style="color:var(--color-text-muted)">当前时间没有可捕捉的'+TAB_NAMES[t]+'</div>';
     } else {
@@ -491,11 +368,13 @@ function renderTodayPanel() {
     state.todayOpen = !state.todayOpen;
     saveUIState();
     renderTodayPanel();
+    document.getElementById('todayHeader').focus();
   });
   document.getElementById('todayUncollected').addEventListener('change', e => {
     state.todayUncollectedOnly = e.target.checked;
     saveUIState();
     renderTodayPanel();
+    document.getElementById('todayUncollected').focus();
   });
   // Group headers toggle in place (no full re-render); state.todayGroups
   // keeps the choice in sync for the next scheduled panel refresh.
@@ -504,38 +383,33 @@ function renderTodayPanel() {
       const g = h.dataset.group;
       state.todayGroups[g] = !state.todayGroups[g];
       h.classList.toggle('open', state.todayGroups[g]);
-      document.getElementById('todayGroup-' + g).classList.toggle('open', state.todayGroups[g]);
+      h.setAttribute('aria-expanded', state.todayGroups[g]);
+      const body = document.getElementById('todayGroup-' + g);
+      body.classList.toggle('open', state.todayGroups[g]);
+      body.hidden = !state.todayGroups[g];
       saveUIState();
     });
   });
   bindHemisphereButtons(document.getElementById('todayPanel'));
 }
 
-// No name-search box — deliberate, not an oversight. Search was decided
+// No name-search box: deliberate, not an oversight. Search was decided
 // against: the filter dimensions (location / shadow / weather / month /
 // hour / status) are the intended way to find a creature, and they compose to
 // answer the questions this page exists for ("what can I catch right now",
 // "what's still missing"). If a future change feels like it needs a search
-// box, that decision was made on purpose — don't add one without checking
+// box, that decision was made on purpose; don't add one without checking
 // with the project owner first.
 function renderFilters() {
   const tab = state.activeTab;
   const f = state.filters[tab];
-  const data = DATA_MAP[tab];
-  let locations = [], shadows = [], weathers = [];
+  const definition = TAB_DEFINITIONS[tab];
+  const locations = getFilterOptions(DATA_MAP, tab, 'location');
+  const shadows = getFilterOptions(DATA_MAP, tab, 'shadowSize');
+  const weathers = getFilterOptions(DATA_MAP, tab, 'weather');
 
-  if (tab === 'fish' || tab === 'bug') {
-    locations = [...new Set(data.map(x => x.location))];
-  }
-  if (tab === 'fish' || tab === 'sea') {
-    shadows = [...new Set(data.map(x => x.shadowSize))];
-  }
-  if (tab === 'bug') {
-    weathers = [...new Set(data.map(x => x.weather))];
-  }
-
-  let html = '<button class="filter-toggle-btn" id="filterToggle">🔍 筛选条件</button>';
-  html += '<div class="filter-panel'+(state.filterOpen?' open':'')+'">';
+  let html = '<button type="button" class="filter-toggle-btn" id="filterToggle" aria-expanded="'+state.filterOpen+'" aria-controls="filterPanel">🔍 筛选条件</button>';
+  html += '<div class="filter-panel'+(state.filterOpen?' open':'')+'" id="filterPanel">';
 
   html += '<div class="filter-row"><span class="filter-label">半球</span><div class="filter-options">';
   html += hemisphereButtons('filter-btn');
@@ -543,30 +417,30 @@ function renderFilters() {
 
   html += '<div class="filter-row"><span class="filter-label">收集状态</span><div class="filter-options">';
   for (const [val,label] of CONFIG.STATUS_OPTS) {
-    html += '<button class="filter-btn'+(f.status===val?' active':'')+'" data-filter="status" data-value="'+val+'">'+label+'</button>';
+    html += '<button type="button" class="filter-btn'+(f.status===val?' active':'')+'" data-filter="status" data-value="'+val+'" aria-pressed="'+(f.status===val)+'">'+label+'</button>';
   }
   html += '</div></div>';
 
-  if (tab === 'fish' || tab === 'bug') {
+  if (definition.filters.includes('location')) {
     html += '<div class="filter-row"><span class="filter-label">出现场所</span><div class="filter-options">';
     locations.forEach(loc => {
-      html += '<button class="filter-btn'+(f.location.includes(loc)?' active':'')+'" data-filter="location" data-value="'+escapeHtml(loc)+'">'+escapeHtml(loc)+'</button>';
+      html += '<button type="button" class="filter-btn'+(f.location.includes(loc)?' active':'')+'" data-filter="location" data-value="'+escapeHtml(loc)+'" aria-pressed="'+f.location.includes(loc)+'">'+escapeHtml(loc)+'</button>';
     });
     html += '</div></div>';
   }
 
-  if (tab !== 'bug') {
+  if (definition.filters.includes('shadowSize')) {
     html += '<div class="filter-row"><span class="filter-label">'+(tab==='sea'?'影子大小':'鱼影尺寸')+'</span><div class="filter-options">';
     shadows.forEach(s => {
-      html += '<button class="filter-btn'+(f.shadowSize.includes(s)?' active':'')+'" data-filter="shadowSize" data-value="'+escapeHtml(s)+'">'+escapeHtml(s)+'</button>';
+      html += '<button type="button" class="filter-btn'+(f.shadowSize.includes(s)?' active':'')+'" data-filter="shadowSize" data-value="'+escapeHtml(s)+'" aria-pressed="'+f.shadowSize.includes(s)+'">'+escapeHtml(s)+'</button>';
     });
     html += '</div></div>';
   }
 
-  if (tab === 'bug') {
+  if (definition.filters.includes('weather')) {
     html += '<div class="filter-row"><span class="filter-label">天气条件</span><div class="filter-options">';
     weathers.forEach(w => {
-      html += '<button class="filter-btn'+(f.weather.includes(w)?' active':'')+'" data-filter="weather" data-value="'+escapeHtml(w)+'">'+escapeHtml(w)+'</button>';
+      html += '<button type="button" class="filter-btn'+(f.weather.includes(w)?' active':'')+'" data-filter="weather" data-value="'+escapeHtml(w)+'" aria-pressed="'+f.weather.includes(w)+'">'+escapeHtml(w)+'</button>';
     });
     html += '</div></div>';
   }
@@ -574,7 +448,7 @@ function renderFilters() {
   html += '<div class="filter-row"><span class="filter-label">出现月份</span><div class="filter-options" id="monthGrid">';
   const curMon = getLocalTime().getMonth() + 1;
   for (let m = 1; m <= CONFIG.MONTHS; m++) {
-    html += '<button class="filter-btn month-grid'+(f.month===m?' active':'')+(m===curMon?' is-now':'')+'" data-filter="month" data-value="'+m+'">'+m+'</button>';
+    html += '<button type="button" class="filter-btn month-grid'+(f.month===m?' active':'')+(m===curMon?' is-now':'')+'" data-filter="month" data-value="'+m+'" aria-pressed="'+(f.month===m)+'">'+m+'</button>';
   }
   html += '</div></div>';
 
@@ -585,22 +459,22 @@ function renderFilters() {
   // made none of that discoverable, so 不限 is now an explicit chip.
   html += '<div class="filter-row"><span class="filter-label">出现时间</span><div class="filter-options" id="hourGrid">';
   const curHr = getLocalTime().getHours();
-  html += '<button class="filter-btn'+(f.hour===null?' active':'')+'" data-filter="hour" data-value="none">不限</button>';
-  html += '<button class="filter-btn'+(f.hour==='all'?' active':'')+'" data-filter="hour" data-value="all">全天出现</button>';
+  html += '<button type="button" class="filter-btn'+(f.hour===null?' active':'')+'" data-filter="hour" data-value="none" aria-pressed="'+(f.hour===null)+'">不限</button>';
+  html += '<button type="button" class="filter-btn'+(f.hour==='all'?' active':'')+'" data-filter="hour" data-value="all" aria-pressed="'+(f.hour==='all')+'">全天出现</button>';
   for (let h = 0; h < CONFIG.HOURS; h++) {
-    html += '<button class="filter-btn'+(f.hour===h?' active':'')+(h===curHr?' is-now':'')+'" data-filter="hour" data-value="'+h+'">'+h+'</button>';
+    html += '<button type="button" class="filter-btn'+(f.hour===h?' active':'')+(h===curHr?' is-now':'')+'" data-filter="hour" data-value="'+h+'" aria-pressed="'+(f.hour===h)+'">'+h+'</button>';
   }
   html += '</div></div>';
 
   html += '<div class="filter-row"><span style="flex:1"></span>';
-  html += '<button class="filter-reset" id="filterReset">重置全部</button>';
+  html += '<button type="button" class="filter-reset" id="filterReset">重置全部</button>';
   html += '</div></div>';
 
   document.getElementById('filterBar').innerHTML = html;
 }
 
 // Sync every filter chip's classes against the current state, in place.
-// Filter taps and clock changes both land here — a tap only flips chip
+// Filter taps and clock changes both land here: a tap only flips chip
 // classes (no innerHTML rebuild, so focus and scroll survive), and a clock
 // change additionally moves the is-now highlight on the month/hour grids.
 function syncFilterChips() {
@@ -620,6 +494,7 @@ function syncFilterChips() {
       active = f.hour === (value === 'all' ? 'all' : value === 'none' ? null : parseInt(value));
     }
     btn.classList.toggle('active', active);
+    btn.setAttribute('aria-pressed', active);
     if (filter === 'month') {
       btn.classList.toggle('is-now', parseInt(value) === curMon);
     } else if (filter === 'hour') {
@@ -628,8 +503,8 @@ function syncFilterChips() {
   });
 }
 
-// One delegated listener for everything clickable in the filter bar — filter
-// chips, hemisphere buttons, the mobile toggle and 重置全部 — attached once
+// One delegated listener for everything clickable in the filter bar: filter
+// chips, hemisphere buttons, the mobile toggle and 重置全部; attached once
 // at startup. #filterBar itself is persistent (only its innerHTML is
 // re-rendered), so the listener survives re-renders without stacking
 // duplicates.
@@ -640,14 +515,17 @@ document.getElementById('filterBar').addEventListener('click', e => {
   if (e.target.closest('#filterToggle')) {
     state.filterOpen = !state.filterOpen;
     saveUIState();
-    renderFilters();
+    const toggle = document.getElementById('filterToggle');
+    const panel = document.getElementById('filterPanel');
+    toggle.setAttribute('aria-expanded', state.filterOpen);
+    panel.classList.toggle('open', state.filterOpen);
     return;
   }
 
   if (e.target.closest('#filterReset')) {
-    // Resetting hands hour control back to the clock, and clears sort too —
+    // Resetting hands hour control back to the clock, and clears sort too:
     // the button says 重置全部, so leaving sort applied would be a lie.
-    state.filters[state.activeTab] = makeFilters(state.activeTab);
+    state.filters[state.activeTab] = makeFilters(state.activeTab, getLocalTime());
     state.sort = { key: null, dir: 'asc' };
     saveUIState();
     syncFilterChips();
@@ -669,7 +547,7 @@ document.getElementById('filterBar').addEventListener('click', e => {
   } else if (filter === 'hour') {
     // Any manual hour choice (including 不限 and 全天出现) marks the filter
     // as user-owned so the hourly tick won't clobber it. 不限 is "no hour
-    // filter", which is itself a choice — not a request to follow the clock
+    // filter", which is itself a choice, not a request to follow the clock
     // again. Only 重置全部 hands control back to the clock.
     state.filters[tab].hourManual = true;
     if (value === 'none') {
@@ -693,8 +571,8 @@ document.getElementById('listSection').innerHTML =
 // Row elements are cached by creature id and reused across renders. Rebuilding
 // #listSection wholesale meant parsing ~69KB of HTML and constructing every
 // element again for each filter tap; now a re-render only re-orders nodes that
-// already exist. What a row's markup bakes in — the tab, the hemisphere's
-// months, the current-month highlight — is tracked in rowCacheSig, and any
+// already exist. What a row's markup bakes in: the tab, the hemisphere's
+// months, the current-month highlight, is tracked in rowCacheSig, and any
 // change there invalidates the whole cache.
 const rowCache = new Map();
 let rowCacheSig = '';
@@ -703,38 +581,39 @@ let rowCacheSig = '';
 let lastFiltered = [];
 
 function buildRow(item, tab, northern, curMon) {
-  let html = '<div class="check-box"></div><div class="creature-main">';
+  let html = '<input class="creature-checkbox sr-only" type="checkbox" data-id="'+item.id+'" aria-label="'+escapeHtml(item.name)+'">'
+    + '<span class="check-box" aria-hidden="true"></span><span class="creature-main">';
   html += '<span class="creature-name">'+escapeHtml(item.name)+'</span>';
-  // Sea creatures are all 海洋底部 — a tag that never varies is pure noise.
+  // Sea creatures are all 海洋底部: a tag that never varies is pure noise.
   if (tab !== 'sea') {
     html += '<span class="tag tag-location">'+escapeHtml(item.location)+'</span>';
   }
   if (item.shadowSize) {
     html += '<span class="tag tag-shadow">'+escapeHtml(item.shadowSize)+'</span>';
   }
-  // Weather is filterable on the bug tab, so it has to be visible on the row —
+  // Weather is filterable on the bug tab, so it has to be visible on the row:
   // otherwise a user who filters by 雨天 can't tell why a given row matched.
   if (item.weather && item.weather !== '无限制') {
     html += '<span class="tag tag-weather">'+escapeHtml(item.weather)+'</span>';
   }
   html += '<span class="tag-price">'+item.price+' 铃钱</span>';
-  // Capture notes are prose, not a filter dimension — rendered as plain text so
+  // Capture notes are prose, not a filter dimension; rendered as plain text so
   // they read differently from the tags beside them.
   if (item.note) {
     html += '<span class="note">'+escapeHtml(item.note)+'</span>';
   }
-  html += '</div><div class="creature-meta"><div class="meta-row"><span class="meta-label">月:</span>';
-  const months = northern ? item.northMonths : item.southMonths;
+  html += '</span><span class="creature-meta"><span class="meta-row"><span class="meta-label">月:</span>';
+  const months = monthsForHemisphere(item, northern ? 'north' : 'south');
   for (let m = 1; m <= CONFIG.MONTHS; m++) {
     html += '<span class="heat-cell'+(months.includes(m)?' on':'')+(m===curMon?' current':'')+'">'+m+'</span>';
   }
   // Hour availability as a text range rather than 24 cells per row: the 24-cell
   // grid was ~4800 elements for an 80-row list and dominated both the HTML
   // payload and layout cost.
-  html += '</div><div class="meta-row"><span class="meta-label">时:</span><span class="meta-hours">'
-    + getTimeRangeLabel(item.hours) + '</span></div></div>';
+  html += '</span><span class="meta-row"><span class="meta-label">时:</span><span class="meta-hours">'
+    + getTimeRangeLabel(item.hours) + '</span></span></span>';
 
-  const el = document.createElement('div');
+  const el = document.createElement('label');
   el.className = 'creature-item';
   el.dataset.id = item.id;
   el.innerHTML = html;
@@ -742,27 +621,38 @@ function buildRow(item, tab, northern, curMon) {
 }
 
 function renderListHeader(count) {
+  const editDisabled = getCollectionAccess(collectionLoadFailed).canEdit ? '' : ' disabled';
   let html = '';
   CONFIG.SORT_KEYS.forEach(sk => {
     const arrow = state.sort.key === sk.key ? (state.sort.dir==='asc'?' ▲':' ▼') : '';
-    html += '<span class="sortable" data-sort="'+sk.key+'">'+sk.label+arrow+'</span> ';
+    const active = state.sort.key === sk.key;
+    const current = active ? '，当前'+(state.sort.dir==='asc'?'升序':'降序') : '';
+    html += '<button type="button" class="sort-btn" data-sort="'+sk.key+'" aria-pressed="'+active+'" aria-label="按'+sk.label+'排序'+current+'">'+sk.label+arrow+'</button>';
   });
   html += '<span style="flex:1"></span>';
   html += '<span style="font-size:12px;color:var(--color-text-muted)">共 '+count+' 条</span>';
-  html += '<button class="data-btn" id="markAllVisible" style="margin-left:8px;padding:4px 12px;font-size:12px">全标</button>';
-  html += '<button class="data-btn" id="unmarkAllVisible" style="padding:4px 12px;font-size:12px">全取消</button>';
+  html += '<button type="button" class="data-btn" id="markAllVisible" style="margin-left:8px;padding:4px 12px;font-size:12px"'+editDisabled+'>全标</button>';
+  html += '<button type="button" class="data-btn" id="unmarkAllVisible" style="padding:4px 12px;font-size:12px"'+editDisabled+'>全取消</button>';
   document.getElementById('listHeader').innerHTML = html;
 }
 
 function renderList() {
+  const canEdit = getCollectionAccess(collectionLoadFailed).canEdit;
+  const focusedId = document.activeElement?.classList.contains('creature-checkbox')
+    ? document.activeElement.dataset.id
+    : null;
+  const focusedSort = document.activeElement?.classList.contains('sort-btn')
+    ? document.activeElement.dataset.sort
+    : null;
   const tab = state.activeTab;
-  const filtered = applyFilters(DATA_MAP[tab], tab);
+  const filtered = filteredItems(tab);
   lastFiltered = filtered;
   renderListHeader(filtered.length);
 
   const rows = document.getElementById('listRows');
   if (filtered.length === 0) {
     rows.innerHTML = '<div class="empty-state">没有符合条件的生物，请调整筛选条件 🔍</div>';
+    if (focusedSort) document.querySelector('.sort-btn[data-sort="'+focusedSort+'"]')?.focus();
     return;
   }
 
@@ -783,53 +673,38 @@ function renderList() {
       el = buildRow(item, tab, northern, curMon);
       rowCache.set(item.id, el);
     }
-    el.classList.toggle('collected', state.collected.has(item.id));
+    const collected = state.collected.has(item.id);
+    el.classList.toggle('collected', collected);
+    const checkbox = el.querySelector('.creature-checkbox');
+    checkbox.checked = collected;
+    checkbox.disabled = !canEdit;
     frag.appendChild(el);
   }
   rows.replaceChildren(frag);
+  if (focusedId) rows.querySelector('.creature-checkbox[data-id="'+focusedId+'"]')?.focus();
+  else if (focusedSort) document.querySelector('.sort-btn[data-sort="'+focusedSort+'"]')?.focus();
 }
 
-// Bulk mark/unmark acts immediately and offers 撤销 in the toast — the old
-// confirm() gate is gone. A confirm couldn't be un-clicked anyway: once
-// "确定" was tapped, up to 80 rows changed with no way back. An undo that
-// restores exactly the rows this operation touched (single toggles made in
-// between are preserved) is strictly safer.
+// Bulk actions record only ids whose state actually changed. Undo restores an
+// id only while it still has the bulk result, so a later single-row edit wins.
 function bulkSetCollected(add) {
   if (lastFiltered.length === 0) return;
   const verb = add ? '标记' : '取消标记';
-  const before = new Set(state.collected);
   const ids = lastFiltered.map(x => x.id);
-  ids.forEach(id => add ? state.collected.add(id) : state.collected.delete(id));
-  saveCollected();
-  renderProgress();
-  const f = state.filters[state.activeTab];
-  if (f.status !== 'all' || state.sort.key === 'collected') {
-    renderList();
-  } else {
-    document.querySelectorAll('#listRows .creature-item').forEach(el => {
-      el.classList.toggle('collected', add);
-    });
+  const { next, changes } = setCollectedForIds(state.collected, ids, add);
+  if (changes.length === 0) {
+    showToast(add ? '当前条目均已标记' : '当前条目均未标记');
+    return;
   }
-  showToast('已' + verb + ' ' + ids.length + ' 条', {
+  if (!commitCollected(next)) return;
+  showToast('已' + verb + ' ' + changes.length + ' 条', {
     duration: 6000,
     action: {
       label: '撤销',
       onClick: () => {
-        // Only the rows this bulk operation touched are restored to their
-        // pre-op state, so a single toggle made while the toast was up
-        // survives the undo.
-        ids.forEach(id => before.has(id) ? state.collected.add(id) : state.collected.delete(id));
-        saveCollected();
-        renderProgress();
-        const f = state.filters[state.activeTab];
-        if (f.status !== 'all' || state.sort.key === 'collected') {
-          renderList();
-        } else {
-          document.querySelectorAll('#listRows .creature-item').forEach(el => {
-            el.classList.toggle('collected', state.collected.has(el.dataset.id));
-          });
-        }
-        showToast('已撤销');
+        const undo = undoCollectedChanges(state.collected, changes);
+        if (undo.restored > 0 && commitCollected(undo.next)) showToast('已撤销');
+        else if (undo.restored === 0) showToast('没有可撤销的条目');
       }
     }
   });
@@ -842,7 +717,7 @@ document.getElementById('listSection').addEventListener('click', e => {
   if (e.target.closest('#markAllVisible')) return bulkSetCollected(true);
   if (e.target.closest('#unmarkAllVisible')) return bulkSetCollected(false);
 
-  const sortEl = e.target.closest('.sortable');
+  const sortEl = e.target.closest('.sort-btn');
   if (sortEl) {
     const key = sortEl.dataset.sort;
     if (state.sort.key === key) {
@@ -856,25 +731,13 @@ document.getElementById('listSection').addEventListener('click', e => {
     return;
   }
 
-  const itemEl = e.target.closest('.creature-item');
-  if (!itemEl) return;
-  const id = itemEl.dataset.id;
-  if (state.collected.has(id)) {
-    state.collected.delete(id);
-    itemEl.classList.remove('collected');
-  } else {
-    state.collected.add(id);
-    itemEl.classList.add('collected');
-  }
-  saveCollected();
-  renderProgress();
-  // When a status filter or collected-sort is active, the item must
-  // (dis)appear or reorder — fall back to a list rebuild. Otherwise the
-  // in-place class toggle above is enough and avoids losing scroll/focus.
-  const f = state.filters[state.activeTab];
-  if (f.status !== 'all' || state.sort.key === 'collected') {
-    renderList();
-  }
+});
+
+document.getElementById('listSection').addEventListener('change', e => {
+  const input = e.target.closest('.creature-checkbox');
+  if (!input) return;
+  const { next } = setCollectedForIds(state.collected, [input.dataset.id], input.checked);
+  if (!commitCollected(next)) input.checked = !input.checked;
 });
 
 function renderAll() {
@@ -886,10 +749,17 @@ function renderAll() {
 }
 
 function renderDataBar() {
+  const access = getCollectionAccess(collectionLoadFailed);
+  const notices = [getStorageModeNotice(window.location.protocol)];
+  if (!access.canExport) {
+    notices.push('未能加载已有收集记录。为避免生成错误的空备份，导出和修改已暂停；可导入有效备份恢复。');
+  }
+  const notice = notices.filter(Boolean).join(' ');
   document.getElementById('dataBar').innerHTML =
-    '<button class="data-btn" id="exportBtn">导出收集记录</button>' +
-    '<button class="data-btn" id="importBtn">导入收集记录</button>' +
-    '<input type="file" id="importFile" accept="application/json" style="display:none">';
+    (notice ? '<span class="storage-mode-note" id="storageModeNote" role="note">'+escapeHtml(notice)+'</span>' : '') +
+    '<button type="button" class="data-btn" id="exportBtn"'+(access.canExport?'':' disabled aria-describedby="storageModeNote"')+'>导出收集记录</button>' +
+    '<button type="button" class="data-btn" id="importBtn">导入收集记录</button>' +
+    '<input type="file" id="importFile" accept="application/json" aria-label="选择收集记录 JSON 文件" hidden>';
   document.getElementById('exportBtn').addEventListener('click', exportCollected);
   document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
   document.getElementById('importFile').addEventListener('change', importCollected);
@@ -902,11 +772,12 @@ document.getElementById('navTabs').addEventListener('click', e => {
   state.filterOpen = false;
   saveUIState();
   renderAll();
+  document.querySelector('.nav-tab[data-tab="'+state.activeTab+'"]').focus();
 });
 
 // Everything clock-driven is hour-granular: the today panel filters by hour
 // and its header shows no minutes, and the hour filter follows the clock. So
-// a minute tick has nothing to update — re-rendering on it only destroyed and
+// a minute tick has nothing to update: re-rendering on it only destroyed and
 // rebound DOM for an identical result. The stamp also carries the date, so a
 // device that sleeps across a whole day (same hour, different day) still
 // counts as a change when it wakes.
@@ -920,7 +791,7 @@ let lastTickStamp = clockStamp();
 function onClockChange() {
   const hour = getLocalTime().getHours();
   renderTodayPanel();
-  // Follow the clock with the hour filter — but only until the user picks an
+  // Follow the clock with the hour filter, but only until the user picks an
   // hour themselves (hourManual; 不限 counts as a pick too). 重置全部 is what
   // hands control back to the clock. Every tab follows, otherwise switching
   // tabs surfaces a stale hour from whenever that tab was last active.
@@ -940,7 +811,7 @@ setInterval(() => {
 }, CONFIG.TICK_MS);
 
 // Background tabs get their timers throttled, so the minute tick may fire
-// late — or not at all until the tab is visible again. Re-check on visibility
+// late, or not at all until the tab is visible again. Re-check on visibility
 // so the page is correct the moment the user looks at it, not up to a minute
 // later.
 document.addEventListener('visibilitychange', () => {
@@ -953,3 +824,5 @@ document.addEventListener('visibilitychange', () => {
 
 renderDataBar();
 renderAll();
+if (collectionLoadFailed) showCollectionLoadWarning();
+else if (storageAccessError) showStorageWarning();

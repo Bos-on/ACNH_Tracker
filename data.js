@@ -1,3 +1,5 @@
+import { shiftMonths } from './schema.js';
+
 const FISH_DATA = [
   {
     id: "fish_001",
@@ -5,7 +7,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "特小",
     northMonths: [1,2,3,11,12],
-    southMonths: [5,6,7,8,9],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 900
   },
@@ -15,7 +16,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "特小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 200
   },
@@ -25,7 +25,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 160
   },
@@ -35,7 +34,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "中",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 240
   },
@@ -45,7 +43,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "稍大",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 300
   },
@@ -55,7 +52,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "稍大",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 4000
   },
@@ -65,7 +61,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "特小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1300
   },
@@ -75,7 +70,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "特小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 1300
   },
@@ -85,7 +79,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 4500
   },
@@ -95,7 +88,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "特小",
     northMonths: [4,5,6,7,8],
-    southMonths: [1,2,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 300
   },
@@ -105,7 +97,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "稍小",
     northMonths: [4,5,6,7,8,9],
-    southMonths: [1,2,3,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 200
   },
@@ -115,7 +106,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍大",
     northMonths: [8,9],
-    southMonths: [2,3],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 3750
   },
@@ -125,7 +115,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍大",
     northMonths: [4,5,6,7,8,9,10],
-    southMonths: [1,2,3,4,10,11,12],
     hours: [0,1,2,3,4,21,22,23],
     price: 5000
   },
@@ -135,7 +124,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "特小",
     northMonths: [3,4,5,6,7],
-    southMonths: [1,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 100
   },
@@ -145,7 +133,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "稍小",
     northMonths: [5,6,7,8],
-    southMonths: [1,2,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 120
   },
@@ -155,7 +142,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 400
   },
@@ -165,7 +151,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍小",
     northMonths: [3,4,5],
-    southMonths: [9,10,11],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 400
   },
@@ -175,7 +160,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "稍大",
     northMonths: [5,6,7,8,9,10],
-    southMonths: [1,2,3,4,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 800
   },
@@ -185,7 +169,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "稍大",
     northMonths: [6,7,8],
-    southMonths: [1,2,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 5500
   },
@@ -195,7 +178,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 180
   },
@@ -205,7 +187,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "中",
     northMonths: [1,2,3,10,11,12],
-    southMonths: [4,5,6,7,8,9],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 300
   },
@@ -215,7 +196,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍大",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 400
   },
@@ -225,7 +205,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "中",
     northMonths: [6,7,8,9,10],
-    southMonths: [1,2,3,4,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 800
   },
@@ -235,7 +214,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "大",
     northMonths: [9,10,11,12],
-    southMonths: [3,4,5,6],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1800
   },
@@ -245,7 +223,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍小",
     northMonths: [1,2,12],
-    southMonths: [6,7,8],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 400
   },
@@ -255,7 +232,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "中",
     northMonths: [7,8,9],
-    southMonths: [1,2,3],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 900
   },
@@ -265,7 +241,6 @@ const FISH_DATA = [
     location: "悬崖上",
     shadowSize: "中",
     northMonths: [3,4,5,6,9,10,11],
-    southMonths: [3,4,5,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1000
   },
@@ -275,7 +250,6 @@ const FISH_DATA = [
     location: "悬崖上",
     shadowSize: "中",
     northMonths: [3,4,5,6,9,10,11],
-    southMonths: [3,4,5,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 3800
   },
@@ -285,7 +259,6 @@ const FISH_DATA = [
     location: "悬崖上",
     shadowSize: "中",
     northMonths: [3,4,5,9,10,11],
-    southMonths: [3,4,5,9,10,11],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 15000
   },
@@ -295,7 +268,6 @@ const FISH_DATA = [
     location: "悬崖上",
     shadowSize: "大",
     northMonths: [1,2,3,12],
-    southMonths: [6,7,8,9],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 15000
   },
@@ -305,7 +277,6 @@ const FISH_DATA = [
     location: "出海口",
     shadowSize: "稍大",
     northMonths: [9],
-    southMonths: [3],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 700
   },
@@ -315,7 +286,6 @@ const FISH_DATA = [
     location: "出海口",
     shadowSize: "大",
     northMonths: [9],
-    southMonths: [3],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1800
   },
@@ -325,7 +295,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍小",
     northMonths: [9,10,11],
-    southMonths: [3,4,5],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 2000
   },
@@ -335,7 +304,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "特小",
     northMonths: [4,5,6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,10,11,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 1300
   },
@@ -345,7 +313,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "特小",
     northMonths: [5,6,7,8,9],
-    southMonths: [1,2,3,11,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 1500
   },
@@ -355,7 +322,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍小",
     northMonths: [5,6,7,8,9,10],
-    southMonths: [1,2,3,4,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 3000
   },
@@ -365,7 +331,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍小",
     northMonths: [5,6,7,8,9,10],
-    southMonths: [1,2,3,4,11,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 2500
   },
@@ -375,7 +340,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "特小",
     northMonths: [4,5,6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,10,11,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 500
   },
@@ -385,7 +349,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "特小",
     northMonths: [5,6,7,8,9,10],
-    southMonths: [1,2,3,4,11,12],
     hours: [9,10,11,12,13,14,15,16],
     price: 800
   },
@@ -395,7 +358,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍小",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,9,10,11,12,13,14,15,16,21,22,23],
     price: 2500
   },
@@ -405,7 +367,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍大",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 10000
   },
@@ -415,7 +376,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "大",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22],
     price: 15000
   },
@@ -425,7 +385,6 @@ const FISH_DATA = [
     location: "池塘",
     shadowSize: "大",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 6000
   },
@@ -435,7 +394,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "特大",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 10000
   },
@@ -445,7 +403,6 @@ const FISH_DATA = [
     location: "河流",
     shadowSize: "稍大",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,21,22,23],
     price: 4000
   },
@@ -455,7 +412,6 @@ const FISH_DATA = [
     location: "出海口",
     shadowSize: "特大",
     northMonths: [1,2,3,9,10,11,12],
-    southMonths: [3,4,5,6,7,8,9],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 10000
   },
@@ -465,7 +421,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "特小",
     northMonths: [1,2,3,12],
-    southMonths: [6,7,8,9],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1000
   },
@@ -475,7 +430,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "特小",
     northMonths: [4,5,6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1100
   },
@@ -485,7 +439,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "特小",
     northMonths: [4,5,6,7,8,9],
-    southMonths: [1,2,3,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 650
   },
@@ -495,7 +448,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "稍小",
     northMonths: [4,5,6,7,8,9],
-    southMonths: [1,2,3,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1000
   },
@@ -505,7 +457,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "稍小",
     northMonths: [4,5,6,7,8,9],
-    southMonths: [1,2,3,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1000
   },
@@ -515,7 +466,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "特大",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
     price: 10000
   },
@@ -525,7 +475,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "中",
     northMonths: [4,5,6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 500
   },
@@ -535,7 +484,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "中",
     northMonths: [1,2,11,12],
-    southMonths: [5,6,7,8],
     hours: [0,1,2,3,4,21,22,23],
     price: 5000
   },
@@ -545,7 +493,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "中",
     northMonths: [7,8,9],
-    southMonths: [1,2,3],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 250
   },
@@ -555,7 +502,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
     price: 200
   },
@@ -565,7 +511,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 150
   },
@@ -575,7 +520,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "中",
     northMonths: [3,4,5,6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 5000
   },
@@ -585,7 +529,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "大",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 400
   },
@@ -595,7 +538,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "稍大",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 3000
   },
@@ -605,7 +547,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "中",
     northMonths: [1,2,3,4,10,11,12],
-    southMonths: [4,5,6,7,8,9,10],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 300
   },
@@ -615,7 +556,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "大",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 800
   },
@@ -625,7 +565,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "中",
     northMonths: [1,2,3,4,5,6,7,8,12],
-    southMonths: [1,2,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 500
   },
@@ -635,7 +574,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "细长",
     northMonths: [8,9,10],
-    southMonths: [2,3,4],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 2000
   },
@@ -645,7 +583,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "细长",
     northMonths: [6,7,8,9,10],
-    southMonths: [1,2,3,4,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 600
   },
@@ -655,7 +592,6 @@ const FISH_DATA = [
     location: "码头",
     shadowSize: "特大",
     northMonths: [1,2,3,4,11,12],
-    southMonths: [5,6,7,8,9,10],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 7000
   },
@@ -665,7 +601,6 @@ const FISH_DATA = [
     location: "码头",
     shadowSize: "特大",
     northMonths: [1,2,3,4,7,8,9,11,12],
-    southMonths: [1,2,3,5,6,7,8,9,10],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 10000
   },
@@ -675,7 +610,6 @@ const FISH_DATA = [
     location: "码头",
     shadowSize: "大",
     northMonths: [5,6,7,8,9,10],
-    southMonths: [1,2,3,4,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 4500
   },
@@ -685,7 +619,6 @@ const FISH_DATA = [
     location: "码头",
     shadowSize: "大",
     northMonths: [5,6,7,8,9,10],
-    southMonths: [1,2,3,4,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 6000
   },
@@ -695,7 +628,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "背鳍",
     northMonths: [7,8,9],
-    southMonths: [1,2,3],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
     price: 4000
   },
@@ -705,7 +637,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "大",
     northMonths: [8,9,10,11],
-    southMonths: [2,3,4,5],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
     price: 3000
   },
@@ -715,7 +646,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "背鳍",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 12000
   },
@@ -725,7 +655,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "背鳍",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 8000
   },
@@ -735,7 +664,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "背鳍",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,16,17,18,19,20,21,22,23],
     price: 15000
   },
@@ -745,7 +673,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "背鳍",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 13000
   },
@@ -755,7 +682,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "背鳍",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1500
   },
@@ -765,7 +691,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "稍大",
     northMonths: [1,2,3,11,12],
-    southMonths: [5,6,7,8,9],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 2500
   },
@@ -775,7 +700,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "特大",
     northMonths: [1,2,3,4,5,12],
-    southMonths: [6,7,8,9,10,11],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 9000
   },
@@ -785,7 +709,6 @@ const FISH_DATA = [
     location: "大海",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,21,22,23],
     price: 15000
   },
@@ -796,7 +719,6 @@ const FISH_DATA = [
     shadowSize: "特大",
     weather: "雨天",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 15000
   }
@@ -810,7 +732,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [1,2,3,4,5,6,9,10,11,12],
-    southMonths: [3,4,5,6,7,8,9,10,11,12],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],
     price: 160
   },
@@ -821,7 +742,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [3,4,5,6,9,10],
-    southMonths: [3,4,9,10,11,12],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],
     price: 160
   },
@@ -832,7 +752,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [3,4,5,6,7,8,9],
-    southMonths: [1,2,3,9,10,11,12],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],
     price: 240
   },
@@ -843,7 +762,6 @@ const BUG_DATA = [
     note: "飞行；异色花附近",
     weather: "雨雪天除外",
     northMonths: [3,4,5,6],
-    southMonths: [9,10,11,12],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],
     price: 2500
   },
@@ -854,7 +772,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [4,5,6,7,8],
-    southMonths: [1,2,10,11,12],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
     price: 300
   },
@@ -865,7 +782,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17,18,19],
     price: 1000
   },
@@ -876,7 +792,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "无限制",
     northMonths: [5,6,7,8],
-    southMonths: [1,2,11,12],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19],
     price: 3000
   },
@@ -887,7 +802,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [9,10,11],
-    southMonths: [3,4,5],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17],
     price: 140
   },
@@ -898,7 +812,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [1,2,3,6,7,8,9,12],
-    southMonths: [1,2,3,6,7,8,9,12],
     hours: [0,1,2,3,4,5,6,7,8,19,20,21,22,23],
     price: 4000
   },
@@ -909,7 +822,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [4,5,6,7,8,9],
-    southMonths: [1,2,3,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 3000
   },
@@ -920,7 +832,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [1,2,4,5,6,7,8,9,12],
-    southMonths: [1,2,3,6,7,8,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 2500
   },
@@ -931,7 +842,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [5,6,7,8,9],
-    southMonths: [1,2,3,11,12],
     hours: [8,9,10,11,12,13,14,15,16],
     price: 4000
   },
@@ -942,7 +852,6 @@ const BUG_DATA = [
     note: "户外灯光附近飞行",
     weather: "雨雪天除外",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,19,20,21,22,23],
     price: 130
   },
@@ -952,7 +861,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [4,5,6,7,8,9],
-    southMonths: [1,2,3,10,11,12],
     hours: [0,1,2,3,4,19,20,21,22,23],
     price: 3000
   },
@@ -963,7 +871,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [4,5,6,7,8,9],
-    southMonths: [1,2,3,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16],
     price: 2500
   },
@@ -974,7 +881,6 @@ const BUG_DATA = [
     note: "地面跳跃",
     weather: "无限制",
     northMonths: [4,5,6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17,18,19],
     price: 200
   },
@@ -985,7 +891,6 @@ const BUG_DATA = [
     note: "地面跳跃",
     weather: "雨雪天除外",
     northMonths: [8,9,10,11],
-    southMonths: [2,3,4,5],
     hours: [8,9,10,11,12,13,14,15,16,17,18,19],
     price: 600
   },
@@ -996,7 +901,6 @@ const BUG_DATA = [
     note: "地面跳跃",
     weather: "雨雪天除外",
     northMonths: [8,9,10,11],
-    southMonths: [2,3,4,5],
     hours: [8,9,10,11,12,13,14,15,16,17,18,19],
     price: 400
   },
@@ -1007,7 +911,6 @@ const BUG_DATA = [
     note: "地面跳跃",
     weather: "雨雪天除外",
     northMonths: [7,8,9],
-    southMonths: [1,2,3],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 160
   },
@@ -1018,7 +921,6 @@ const BUG_DATA = [
     note: "地面跳跃",
     weather: "雨雪天除外",
     northMonths: [9,10,11],
-    southMonths: [3,4,5],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 130
   },
@@ -1029,7 +931,6 @@ const BUG_DATA = [
     note: "地面跳跃",
     weather: "雨雪天除外",
     northMonths: [9,10],
-    southMonths: [3,4],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 430
   },
@@ -1040,7 +941,6 @@ const BUG_DATA = [
     note: "会逃走",
     weather: "雨雪天除外",
     northMonths: [3,4,5,6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,9,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 430
   },
@@ -1051,7 +951,6 @@ const BUG_DATA = [
     note: "白色花；会逃走",
     weather: "雨雪天除外",
     northMonths: [3,4,5,6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,9,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 2400
   },
@@ -1062,7 +961,6 @@ const BUG_DATA = [
     note: "花丛附近飞行",
     weather: "雨雪天除外",
     northMonths: [3,4,5,6,7],
-    southMonths: [1,9,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 200
   },
@@ -1073,7 +971,6 @@ const BUG_DATA = [
     note: "摇晃或敲击树干，落下蜂巢中出现",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 2500
   },
@@ -1084,7 +981,6 @@ const BUG_DATA = [
     note: "除椰子和香蕉树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 250
   },
@@ -1095,7 +991,6 @@ const BUG_DATA = [
     note: "除椰子和香蕉树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 300
   },
@@ -1106,7 +1001,6 @@ const BUG_DATA = [
     note: "除椰子和香蕉树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 500
   },
@@ -1117,7 +1011,6 @@ const BUG_DATA = [
     note: "除椰子和香蕉树",
     weather: "无限制",
     northMonths: [8,9],
-    southMonths: [2,3],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 400
   },
@@ -1128,7 +1021,6 @@ const BUG_DATA = [
     note: "除椰子和香蕉树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [4,5,6,7,8,16,17,18,19],
     price: 550
   },
@@ -1139,7 +1031,6 @@ const BUG_DATA = [
     note: "除椰子和香蕉树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 10
   },
@@ -1150,7 +1041,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [9,10],
-    southMonths: [3,4],
     hours: [8,9,10,11,12,13,14,15,16,17,18,19],
     price: 180
   },
@@ -1161,7 +1051,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [4,5,6,7,8,9,10],
-    southMonths: [1,2,3,4,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 230
   },
@@ -1172,7 +1061,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨雪天除外",
     northMonths: [5,6,7,8,9,10],
-    southMonths: [1,2,3,4,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 4500
   },
@@ -1183,7 +1071,6 @@ const BUG_DATA = [
     note: "飞行",
     weather: "雨天除外",
     northMonths: [1,2,11,12],
-    southMonths: [5,6,7,8],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 500
   },
@@ -1194,7 +1081,6 @@ const BUG_DATA = [
     note: "淡水附近飞行",
     weather: "雨雪天除外",
     northMonths: [6],
-    southMonths: [12],
     hours: [0,1,2,3,4,19,20,21,22,23],
     price: 300
   },
@@ -1205,7 +1091,6 @@ const BUG_DATA = [
     note: "听声音挖掘地面",
     weather: "无限制",
     northMonths: [1,2,3,4,5,11,12],
-    southMonths: [5,6,7,8,9,10,11],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 500
   },
@@ -1216,7 +1101,6 @@ const BUG_DATA = [
     note: "池塘水面滑行",
     weather: "雪天除外",
     northMonths: [5,6,7,8,9],
-    southMonths: [1,2,3,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17,18,19],
     price: 130
   },
@@ -1227,7 +1111,6 @@ const BUG_DATA = [
     note: "河流或池塘",
     weather: "无限制",
     northMonths: [5,6,7,8,9],
-    southMonths: [1,2,3,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17,18,19],
     price: 800
   },
@@ -1238,7 +1121,6 @@ const BUG_DATA = [
     note: "河流或池塘",
     weather: "无限制",
     northMonths: [4,5,6,7,8,9],
-    southMonths: [1,2,3,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,19,20,21,22,23],
     price: 2000
   },
@@ -1249,7 +1131,6 @@ const BUG_DATA = [
     note: "会逃走",
     weather: "无限制",
     northMonths: [3,4,5,6,7,8,9,10],
-    southMonths: [1,2,3,4,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 120
   },
@@ -1260,7 +1141,6 @@ const BUG_DATA = [
     note: "会逃走",
     weather: "无限制",
     northMonths: [3,4,5,6,7,8,9,10],
-    southMonths: [1,2,3,4,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,19,20,21,22,23],
     price: 1000
   },
@@ -1271,7 +1151,6 @@ const BUG_DATA = [
     note: "会逃走",
     weather: "雨雪天除外",
     northMonths: [3,4,5,6,10],
-    southMonths: [4,9,10,11,12],
     hours: [8,9,10,11,12,13,14,15,16,17],
     price: 200
   },
@@ -1282,7 +1161,6 @@ const BUG_DATA = [
     note: "地面爬行",
     weather: "雨雪天除外",
     northMonths: [2,3,4,5,6,7,8,9,10],
-    southMonths: [1,2,3,4,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1500
   },
@@ -1292,7 +1170,6 @@ const BUG_DATA = [
     location: "树桩",
     weather: "无限制",
     northMonths: [4,5,6,7,8],
-    southMonths: [1,2,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 2400
   },
@@ -1302,7 +1179,6 @@ const BUG_DATA = [
     location: "树桩",
     weather: "雨雪天除外",
     northMonths: [5,6,9,10,11],
-    southMonths: [3,4,5,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 450
   },
@@ -1312,7 +1188,6 @@ const BUG_DATA = [
     location: "树桩",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 350
   },
@@ -1322,7 +1197,6 @@ const BUG_DATA = [
     location: "树桩",
     weather: "无限制",
     northMonths: [5,6,7,8,9],
-    southMonths: [1,2,3,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 3000
   },
@@ -1332,7 +1206,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 800
   },
@@ -1343,7 +1216,6 @@ const BUG_DATA = [
     note: "雪球附近出现",
     weather: "无限制",
     northMonths: [1,2,12],
-    southMonths: [6,7,8],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 3000
   },
@@ -1354,7 +1226,6 @@ const BUG_DATA = [
     note: "地面爬行",
     weather: "无限制",
     northMonths: [7,8,9],
-    southMonths: [1,2,3],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 300
   },
@@ -1364,7 +1235,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,23],
     price: 10000
   },
@@ -1374,7 +1244,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [6,7,8],
-    southMonths: [1,2,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 200
   },
@@ -1384,7 +1253,6 @@ const BUG_DATA = [
     location: "椰子树",
     weather: "无限制",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 8000
   },
@@ -1394,7 +1262,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 2000
   },
@@ -1404,7 +1271,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1000
   },
@@ -1414,7 +1280,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,23],
     price: 10000
   },
@@ -1424,7 +1289,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,19,20,21,22,23],
     price: 6000
   },
@@ -1434,7 +1298,6 @@ const BUG_DATA = [
     location: "椰子树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 8000
   },
@@ -1444,7 +1307,6 @@ const BUG_DATA = [
     location: "椰子树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 12000
   },
@@ -1454,7 +1316,6 @@ const BUG_DATA = [
     location: "椰子树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 12000
   },
@@ -1464,7 +1325,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 1350
   },
@@ -1474,7 +1334,6 @@ const BUG_DATA = [
     location: "椰子树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 8000
   },
@@ -1484,7 +1343,6 @@ const BUG_DATA = [
     location: "椰子树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 8000
   },
@@ -1494,7 +1352,6 @@ const BUG_DATA = [
     location: "椰子树",
     weather: "无限制",
     northMonths: [7,8],
-    southMonths: [1,2],
     hours: [0,1,2,3,4,5,6,7,8,17,18,19,20,21,22,23],
     price: 12000
   },
@@ -1504,7 +1361,6 @@ const BUG_DATA = [
     location: "树干",
     weather: "无限制",
     northMonths: [7,8,9,10,11],
-    southMonths: [1,2,3,4,5],
     hours: [4,5,6,7,8,17,18,19],
     price: 600
   },
@@ -1515,7 +1371,6 @@ const BUG_DATA = [
     note: "拟态为叶片（家具物品形式）",
     weather: "无限制",
     northMonths: [7,8,9],
-    southMonths: [1,2,3],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 600
   },
@@ -1526,7 +1381,6 @@ const BUG_DATA = [
     note: "摇晃或敲击垂下",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 600
   },
@@ -1537,7 +1391,6 @@ const BUG_DATA = [
     note: "下雨或有腐烂的大头菜时出现",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 80
   },
@@ -1548,7 +1401,6 @@ const BUG_DATA = [
     note: "平时像是个贝壳",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,19,20,21,22,23],
     price: 1000
   },
@@ -1558,7 +1410,6 @@ const BUG_DATA = [
     location: "沙滩",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 200
   },
@@ -1569,7 +1420,6 @@ const BUG_DATA = [
     note: "腐烂的大头菜和垃圾附近飞行",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 60
   },
@@ -1580,7 +1430,6 @@ const BUG_DATA = [
     note: "随机出现（飞到附近会有嗡嗡声）",
     weather: "雨雪天除外",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,17,18,19,20,21,22,23],
     price: 130
   },
@@ -1591,7 +1440,6 @@ const BUG_DATA = [
     note: "居民身上",
     weather: "无限制",
     northMonths: [4,5,6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 70
   },
@@ -1602,7 +1450,6 @@ const BUG_DATA = [
     note: "岩石或灌木上；会逃走",
     weather: "雨天",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 250
   },
@@ -1613,7 +1460,6 @@ const BUG_DATA = [
     note: "敲击岩石",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,9,10,11,12],
-    southMonths: [3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,23],
     price: 250
   },
@@ -1624,7 +1470,6 @@ const BUG_DATA = [
     note: "敲击岩石",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,9,10,11,12],
-    southMonths: [3,4,5,6,7,8,9,10,11,12],
     hours: [16,17,18,19,20,21,22,23],
     price: 300
   },
@@ -1635,7 +1480,6 @@ const BUG_DATA = [
     note: "摇晃或敲击垂下",
     weather: "无限制",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,19,20,21,22,23],
     price: 600
   },
@@ -1646,7 +1490,6 @@ const BUG_DATA = [
     note: "地面爬行；靠近会主动攻击",
     weather: "无限制",
     northMonths: [1,2,3,4,11,12],
-    southMonths: [5,6,7,8,9,10],
     hours: [0,1,2,3,4,19,20,21,22,23],
     price: 8000
   },
@@ -1657,7 +1500,6 @@ const BUG_DATA = [
     note: "地面爬行；靠近会主动攻击",
     weather: "无限制",
     northMonths: [5,6,7,8,9,10],
-    southMonths: [1,2,3,4,11,12],
     hours: [0,1,2,3,4,19,20,21,22,23],
     price: 8000
   }
@@ -1670,7 +1512,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍大",
     northMonths: [1,2,3,4,5,6,7,10,11,12],
-    southMonths: [1,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 600
   },
@@ -1680,7 +1521,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 900
   },
@@ -1690,7 +1530,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [1,2,3,4,11,12],
-    southMonths: [5,6,7,8,9,10],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 500
   },
@@ -1700,7 +1539,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [1,2,11,12],
-    southMonths: [5,6,7,8],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 10000
   },
@@ -1710,7 +1548,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 500
   },
@@ -1720,7 +1557,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [5,6,7,8,9],
-    southMonths: [1,2,3,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1700
   },
@@ -1730,7 +1566,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [5,6,7,8,9],
-    southMonths: [1,2,3,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 2000
   },
@@ -1740,7 +1575,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍大",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 500
   },
@@ -1750,7 +1584,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [7,8,9],
-    southMonths: [1,2,3],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 600
   },
@@ -1760,7 +1593,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "特小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 600
   },
@@ -1770,7 +1602,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 2800
   },
@@ -1780,7 +1611,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1500
   },
@@ -1790,7 +1620,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [1,2,9,10,11,12],
-    southMonths: [3,4,5,6,7,8],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1100
   },
@@ -1800,7 +1629,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1200
   },
@@ -1810,7 +1638,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1000
   },
@@ -1820,7 +1647,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [3,4,5,9,10,11,12],
-    southMonths: [3,4,5,6,9,10,11],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1000
   },
@@ -1830,7 +1656,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [1,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 2000
   },
@@ -1840,7 +1665,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "大",
     northMonths: [5,6,7,8,9],
-    southMonths: [1,2,3,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 15000
   },
@@ -1850,7 +1674,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [3,4,5,6,9,10,11],
-    southMonths: [3,4,5,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 1800
   },
@@ -1860,7 +1683,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1200
   },
@@ -1870,7 +1692,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [3,4,5,9,10,11],
-    southMonths: [3,4,5,9,10,11],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 6000
   },
@@ -1880,7 +1701,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [5,6,7,8],
-    southMonths: [1,2,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 10000
   },
@@ -1890,7 +1710,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "特小",
     northMonths: [3,4,5,6],
-    southMonths: [9,10,11,12],
     hours: [0,1,2,3,4,21,22,23],
     price: 1400
   },
@@ -1900,7 +1719,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [6,7,8,9,10,11],
-    southMonths: [1,2,3,4,5,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 2200
   },
@@ -1910,7 +1728,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [1,2,3,4,5,11,12],
-    southMonths: [5,6,7,8,9,10,11],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1900
   },
@@ -1920,7 +1737,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍大",
     northMonths: [1,2,3,4,11,12],
-    southMonths: [5,6,7,8,9,10],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 6000
   },
@@ -1930,7 +1746,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍大",
     northMonths: [1,2,3,11,12],
-    southMonths: [5,6,7,8,9],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 8000
   },
@@ -1940,7 +1755,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "特小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 600
   },
@@ -1950,7 +1764,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "大",
     northMonths: [3,4],
-    southMonths: [9,10],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 12000
   },
@@ -1960,7 +1773,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [6,7,8,9],
-    southMonths: [1,2,3,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 3000
   },
@@ -1970,7 +1782,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [1,2,9,10,11,12],
-    southMonths: [3,4,5,6,7,8],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 1400
   },
@@ -1980,7 +1791,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
-    southMonths: [1,2,3,4,5,6,7,8,9,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 2500
   },
@@ -1990,7 +1800,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍大",
     northMonths: [10,11,12],
-    southMonths: [4,5,6],
     hours: [0,1,2,3,4,21,22,23],
     price: 5000
   },
@@ -2000,7 +1809,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍大",
     northMonths: [1,4,5,6,12],
-    southMonths: [6,7,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 4500
   },
@@ -2010,7 +1818,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [7,8,9,10],
-    southMonths: [1,2,3,4],
     hours: [0,1,2,3,4,9,10,11,12,13,14,15,16,21,22,23],
     price: 12000
   },
@@ -2020,7 +1827,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [7,8,9],
-    southMonths: [1,2,3],
     hours: [0,1,2,3,4,21,22,23],
     price: 2500
   },
@@ -2030,7 +1836,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [4,5,6,7,8],
-    southMonths: [1,2,10,11,12],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 1500
   },
@@ -2040,7 +1845,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "稍小",
     northMonths: [5,6,7,8,9,10],
-    southMonths: [1,2,3,4,11,12],
     hours: [4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21],
     price: 1100
   },
@@ -2050,7 +1854,6 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "特小",
     northMonths: [8,9],
-    southMonths: [2,3],
     hours: [0,1,2,3,4,5,6,7,8,9,16,17,18,19,20,21,22,23],
     price: 700
   },
@@ -2060,10 +1863,20 @@ const SEA_DATA = [
     location: "海洋底部",
     shadowSize: "中",
     northMonths: [1,2,10,11,12],
-    southMonths: [4,5,6,7,8],
     hours: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
     price: 5000
   }
 ];
 
-const DATA_MAP = { fish: FISH_DATA, bug: BUG_DATA, sea: SEA_DATA };
+function withDerivedHemisphere(items) {
+  return items.map(item => Object.freeze({
+    ...item,
+    southMonths: Object.freeze(shiftMonths(item.northMonths))
+  }));
+}
+
+export const DATA_MAP = Object.freeze({
+  fish: Object.freeze(withDerivedHemisphere(FISH_DATA)),
+  bug: Object.freeze(withDerivedHemisphere(BUG_DATA)),
+  sea: Object.freeze(withDerivedHemisphere(SEA_DATA))
+});
