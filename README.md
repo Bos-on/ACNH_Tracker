@@ -27,6 +27,10 @@ npm run check
 
 `npm test` 覆盖备份兼容性、旧筛选迁移、安全存储、批量撤销、筛选纯逻辑以及 200 条生物数据的不变量。`npm run check` 额外检查所有 JavaScript 文件的语法。GitHub Actions 会对提交和拉取请求运行同一检查。
 
+## Cloudflare Workers 部署
+
+运行 `npm run deploy` 即可部署。Wrangler 精确固定在项目开发依赖中；安装完成后会自动执行 `npm run check`，因此 Cloudflare Builds 在 bundle 过期或测试失败时不会继续部署。`wrangler.jsonc` 将仓库根目录设为静态资源目录，`.assetsignore` 只允许上传 `index.html`、`bundle.js` 和 `favicon.png`，避免把依赖、源码和测试文件作为公开资源上传。
+
 ## 代码结构
 
 - `index.html`：页面结构、视觉样式和响应式规则。
