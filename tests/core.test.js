@@ -10,6 +10,7 @@ import {
   getCollectionAccess,
   getStorageModeNotice,
   getTimeRangeLabel,
+  isLeavingAfterMonth,
   normalizeUIState,
   parseBackup,
   serializeBackup,
@@ -134,6 +135,30 @@ test('time ranges handle midnight wrapping and empty data', () => {
   assert.equal(getTimeRangeLabel([0, 1, 2, 21, 22, 23]), '21-2时');
   assert.equal(getTimeRangeLabel([21, 22, 23, 0, 1, 2]), '21-2时');
   assert.equal(getTimeRangeLabel([]), '未知');
+});
+
+test('leaving badge follows the shown month and wraps at year end', () => {
+  // 红目鲫 northMonths [1,2,3,11,12]: March is its last month, but December
+  // flows into January, so neither December nor November is a last month.
+  const dace = DATA_MAP.fish.find(item => item.id === 'fish_001');
+  assert.equal(isLeavingAfterMonth(dace, 'north', 3), true);
+  assert.equal(isLeavingAfterMonth(dace, 'north', 2), false);
+  assert.equal(isLeavingAfterMonth(dace, 'north', 4), false);
+  assert.equal(isLeavingAfterMonth(dace, 'north', 11), false);
+  assert.equal(isLeavingAfterMonth(dace, 'north', 12), false);
+  // 南半球整体平移半年后，9 月成为最后一个月。
+  assert.equal(isLeavingAfterMonth(dace, 'south', 9), true);
+  assert.equal(isLeavingAfterMonth(dace, 'south', 8), false);
+
+  // 白斑狗鱼 northMonths [9,10,11,12]: December wraps to January, which it
+  // does not have, so December really is its last month.
+  const pike = DATA_MAP.fish.find(item => item.id === 'fish_024');
+  assert.equal(isLeavingAfterMonth(pike, 'north', 12), true);
+  assert.equal(isLeavingAfterMonth(pike, 'north', 11), false);
+
+  const allYear = DATA_MAP.fish.find(item => item.id === 'fish_002');
+  assert.equal(isLeavingAfterMonth(allYear, 'north', 12), false);
+  assert.equal(isLeavingAfterMonth(allYear, 'north', 1), false);
 });
 
 test('file mode explains that browser storage is origin-specific', () => {

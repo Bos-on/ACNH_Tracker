@@ -8,6 +8,7 @@ import {
   getFilterOptions,
   getStorageModeNotice,
   getTimeRangeLabel,
+  isLeavingAfterMonth,
   makeFilters,
   normalizeCollected,
   normalizeUIState,
@@ -350,6 +351,9 @@ function renderTodayPanel() {
     } else {
       items.forEach(({ item }) => {
         let tags = '';
+        if (isLeavingAfterMonth(item, state.hemisphere, now.getMonth() + 1)) {
+          tags += '<span class="tag tag-leaving">月底绝版</span>';
+        }
         if (t !== 'sea') tags += '<span class="tag tag-location">'+escapeHtml(item.location)+'</span>';
         if (item.shadowSize) tags += '<span class="tag tag-shadow">'+escapeHtml(item.shadowSize)+'</span>';
         if (item.weather && item.weather !== '无限制') {
@@ -580,10 +584,15 @@ let rowCacheSig = '';
 // are bound once via delegation rather than re-bound per render.
 let lastFiltered = [];
 
-function buildRow(item, tab, northern, curMon) {
+function buildRow(item, tab, northern, curMon, leavingMonth) {
   let html = '<input class="creature-checkbox sr-only" type="checkbox" data-id="'+item.id+'" aria-label="'+escapeHtml(item.name)+'">'
     + '<span class="check-box" aria-hidden="true"></span><span class="creature-main">';
   html += '<span class="creature-name">'+escapeHtml(item.name)+'</span>';
+  // The leaving badge leads the tag row: it is the most time-critical signal
+  // on the row, so it outranks the descriptive location/shadow/weather tags.
+  if (isLeavingAfterMonth(item, northern ? 'north' : 'south', leavingMonth)) {
+    html += '<span class="tag tag-leaving">月底绝版</span>';
+  }
   // Sea creatures are all 海洋底部: a tag that never varies is pure noise.
   if (tab !== 'sea') {
     html += '<span class="tag tag-location">'+escapeHtml(item.location)+'</span>';
@@ -658,7 +667,10 @@ function renderList() {
 
   const northern = state.hemisphere === 'north';
   const curMon = getLocalTime().getMonth() + 1;
-  const sig = tab + '|' + northern + '|' + curMon;
+  // The leaving badge is baked into cached rows, so the month it is judged
+  // against (the filtered month, else the current month) joins the signature.
+  const leavingMonth = state.filters[tab].month ?? curMon;
+  const sig = tab + '|' + northern + '|' + curMon + '|' + leavingMonth;
   if (sig !== rowCacheSig) {
     rowCache.clear();
     rowCacheSig = sig;
@@ -670,7 +682,7 @@ function renderList() {
   for (const item of filtered) {
     let el = rowCache.get(item.id);
     if (!el) {
-      el = buildRow(item, tab, northern, curMon);
+      el = buildRow(item, tab, northern, curMon, leavingMonth);
       rowCache.set(item.id, el);
     }
     const collected = state.collected.has(item.id);

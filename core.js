@@ -206,6 +206,15 @@ export function undoCollectedChanges(current, changes) {
   return { next, restored };
 }
 
+// A creature is leaving at month end when the shown month is its last one:
+// available in that month but not in the month that follows (December wraps
+// to January). Callers pass the filtered month, or the current month when no
+// month filter is set.
+export function isLeavingAfterMonth(item, hemisphere, month) {
+  const months = monthsForHemisphere(item, hemisphere);
+  return months.includes(month) && !months.includes((month % 12) + 1);
+}
+
 export function applyFilters(data, query) {
   const { filters, hemisphere, collected, sort } = query;
   let items = [...data];
